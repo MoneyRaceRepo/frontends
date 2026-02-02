@@ -83,6 +83,7 @@ export const roomAPI = {
     vaultId: string;
     coinObjectId: string;
     clockId: string;
+    userAddress: string;
   }) => {
     const response = await api.post('/room/join', data);
     return response.data;
@@ -137,6 +138,27 @@ export const playerAPI = {
   // Get player position data
   getPosition: async (positionId: string) => {
     const response = await api.get(`/player/${positionId}`);
+    return response.data;
+  },
+};
+
+// ==================== USDC ENDPOINTS ====================
+export const usdcAPI = {
+  // Mint USDC tokens to a specific recipient
+  mint: async (recipient: string, amount: number) => {
+    const response = await api.post('/usdc/mint', { recipient, amount });
+    return response.data;
+  },
+
+  // Get USDC balance for an address
+  getBalance: async (address: string) => {
+    const response = await api.get(`/usdc/balance/${address}`);
+    return response.data;
+  },
+
+  // Get USDC faucet info (cooldown status)
+  getFaucetInfo: async (address: string) => {
+    const response = await api.get(`/usdc/faucet/${address}`);
     return response.data;
   },
 };

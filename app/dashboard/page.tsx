@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { roomAPI } from "@/lib/api";
+import { roomAPI, usdcAPI } from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 
 interface Room {
@@ -27,6 +27,8 @@ export default function Dashboard() {
   const { user, logout } = useAuthStore();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usdcBalance, setUsdcBalance] = useState<string>("0.00");
+  const [balanceLoading, setBalanceLoading] = useState(false);
 
   // Format address for display (0x1234...5678)
   const formatAddress = (address: string) => {
@@ -41,7 +43,24 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchRooms();
-  }, []);
+    if (user?.address) {
+      fetchUSDCBalance();
+    }
+  }, [user]);
+
+  const fetchUSDCBalance = async () => {
+    if (!user?.address) return;
+    try {
+      setBalanceLoading(true);
+      const data = await usdcAPI.getBalance(user.address);
+      setUsdcBalance(data.balanceFormatted || "0.00");
+    } catch (error) {
+      console.error('Failed to fetch USDC balance:', error);
+      setUsdcBalance("0.00");
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
 
   const fetchRooms = async () => {
     try {
@@ -95,6 +114,15 @@ export default function Dashboard() {
               <div className="text-xs font-mono text-blue-600">
                 {user?.address ? formatAddress(user.address) : 'No wallet'}
               </div>
+              {user?.address && (
+                <div className="text-sm font-semibold text-green-600 mt-1">
+                  {balanceLoading ? (
+                    <span className="text-gray-400">Loading...</span>
+                  ) : (
+                    <span>💰 {usdcBalance} USDC</span>
+                  )}
+                </div>
+              )}
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Logout
@@ -141,14 +169,22 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Action Button */}
-        <div className="mb-6">
+        {/* Action Buttons */}
+        <div className="mb-6 flex flex-col md:flex-row gap-4">
           <Button
             size="lg"
             onClick={() => router.push("/create-room")}
             className="w-full md:w-auto"
           >
             + Create New Saving Room
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => router.push("/mint")}
+            className="w-full md:w-auto"
+          >
+            💰 Mint USDC Tokens
           </Button>
         </div>
 
