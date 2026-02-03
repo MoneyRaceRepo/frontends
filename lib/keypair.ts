@@ -4,6 +4,11 @@
  * Keypair is derived deterministically from Google sub (user ID).
  * Same Google account = Same Sui address, always.
  * 
+ * SECURITY IMPROVEMENTS:
+ * - Uses sessionStorage instead of localStorage (data cleared when tab closes)
+ * - Auto-expires after configurable duration (default: 1 hour)
+ * - Validates keypair integrity on load
+ * 
  * NOTE: This is a simplified version. Real zkLogin would involve:
  * - zkProof generation
  * - Salt service from Mysten
@@ -15,20 +20,38 @@ import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 const KEYPAIR_STORAGE_KEY = 'ephemeral_keypair';
 const USER_SUB_STORAGE_KEY = 'current_user_sub';
 
+// Session expiry time in milliseconds (default: 1 hour)
+const SESSION_EXPIRY_MS = 60 * 60 * 1000;
+
 export interface StoredKeypair {
   secretKey: string; // Base64 encoded
   publicKey: string; // Base64 encoded
   address: string;   // Sui address derived from keypair
   createdAt: number; // Timestamp
+  expiresAt: number; // Expiry timestamp
   userSub: string;   // Google sub this keypair belongs to
 }
 
 /**
- * Clear stored keypair
+ * Get storage object (sessionStorage for security, falls back to localStorage)
+ */
+function getStorage(): Storage | null {
+  if (typeof window === 'undefined') return null;
+  // Prefer sessionStorage for security - clears when tab/browser closes
+  return window.sessionStorage || window.localStorage;
+}
+
+/**
+ * Clear stored keypair from both storages
  */
 export function clearKeypair(): void {
   if (typeof window === 'undefined') return;
+  // Clear from both storages to ensure cleanup
+  sessionStorage.removeItem(KEYPAIR_STORAGE_KEY);
+  sessionStorage.removeItem(USER_SUB_STORAGE_KEY);
   localStorage.removeItem(KEYPAIR_STORAGE_KEY);
+  localStorage.removeItem(USER_SUB_STORAGE_KEY);
+  console.log('Keypair cleared from storage');
 }
 
 /**
@@ -69,40 +92,61 @@ export function generateEphemeralKeypair(): Ed25519Keypair {
 }
 
 /**
- * Save keypair to localStorage with user sub
+ * Save keypair to sessionStorage with user sub and expiry
  */
-export function saveKeypair(keypair: Ed25519Keypair, userSub?: string): void {
-  if (typeof window === 'undefined') return;
+export function saveKeypair(keypair: Ed25519Keypair, userSub?: string, expiryMs: number = SESSION_EXPIRY_MS): void {
+  const storage = getStorage();
+  if (!storage) return;
   
   // getSecretKey() returns base64 string in SDK v2
   const secretKeyBase64 = keypair.getSecretKey();
+  const now = Date.now();
   
   const stored: StoredKeypair = {
     secretKey: secretKeyBase64,
     publicKey: keypair.getPublicKey().toBase64(),
     address: keypair.getPublicKey().toSuiAddress(),
-    createdAt: Date.now(),
+    createdAt: now,
+    expiresAt: now + expiryMs,
     userSub: userSub || '',
   };
   
-  localStorage.setItem(KEYPAIR_STORAGE_KEY, JSON.stringify(stored));
+  storage.setItem(KEYPAIR_STORAGE_KEY, JSON.stringify(stored));
   if (userSub) {
-    localStorage.setItem(USER_SUB_STORAGE_KEY, userSub);
+    storage.setItem(USER_SUB_STORAGE_KEY, userSub);
   }
-  console.log('Keypair saved, address:', stored.address);
+  console.log('Keypair saved securely (expires in', Math.round(expiryMs / 60000), 'minutes), address:', stored.address);
 }
 
 /**
- * Load keypair from localStorage
+ * Check if stored keypair has expired
+ */
+function isKeypairExpired(data: StoredKeypair): boolean {
+  // If no expiresAt field (old format), check createdAt + default expiry
+  const expiresAt = data.expiresAt || (data.createdAt + SESSION_EXPIRY_MS);
+  return Date.now() > expiresAt;
+}
+
+/**
+ * Load keypair from sessionStorage with expiry check
  */
 export function loadKeypair(): Ed25519Keypair | null {
-  if (typeof window === 'undefined') return null;
+  const storage = getStorage();
+  if (!storage) return null;
   
-  const stored = localStorage.getItem(KEYPAIR_STORAGE_KEY);
+  const stored = storage.getItem(KEYPAIR_STORAGE_KEY);
   if (!stored) return null;
   
   try {
     const data: StoredKeypair = JSON.parse(stored);
+    
+    // Check if keypair has expired
+    if (isKeypairExpired(data)) {
+      console.warn('Keypair expired, clearing...');
+      clearKeypair();
+      return null;
+    }
+    
     // In SDK v2, getSecretKey() returns base64 string
     // fromSecretKey expects the base64 string directly
     const keypair = Ed25519Keypair.fromSecretKey(data.secretKey);
@@ -114,6 +158,10 @@ export function loadKeypair(): Ed25519Keypair | null {
       clearKeypair();
       return null;
     }
+    
+    // Log remaining time
+    const remainingMs = (data.expiresAt || (data.createdAt + SESSION_EXPIRY_MS)) - Date.now();
+    console.log('Keypair loaded, expires in', Math.round(remainingMs / 60000), 'minutes');
     
     return keypair;
   } catch (error) {
@@ -128,13 +176,19 @@ export function loadKeypair(): Ed25519Keypair | null {
  * Get stored keypair info without loading full keypair
  */
 export function getStoredKeypairInfo(): StoredKeypair | null {
-  if (typeof window === 'undefined') return null;
+  const storage = getStorage();
+  if (!storage) return null;
   
-  const stored = localStorage.getItem(KEYPAIR_STORAGE_KEY);
+  const stored = storage.getItem(KEYPAIR_STORAGE_KEY);
   if (!stored) return null;
   
   try {
-    return JSON.parse(stored);
+    const data = JSON.parse(stored);
+    // Check expiry even for info
+    if (isKeypairExpired(data)) {
+      return null;
+    }
+    return data;
   } catch {
     return null;
   }
@@ -144,8 +198,9 @@ export function getStoredKeypairInfo(): StoredKeypair | null {
  * Get stored user sub
  */
 export function getStoredUserSub(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(USER_SUB_STORAGE_KEY);
+  const storage = getStorage();
+  if (!storage) return null;
+  return storage.getItem(USER_SUB_STORAGE_KEY);
 }
 
 /**
@@ -196,4 +251,65 @@ export function getOrCreateKeypair(): Ed25519Keypair {
 export function getKeypairAddress(): string | null {
   const info = getStoredKeypairInfo();
   return info?.address ?? null;
+}
+/**
+ * Check if session is valid (keypair exists and not expired)
+ */
+export function isSessionValid(): boolean {
+  const info = getStoredKeypairInfo();
+  return info !== null;
+}
+
+/**
+ * Get session expiry info
+ */
+export function getSessionExpiryInfo(): { isValid: boolean; expiresAt: number | null; remainingMs: number | null } {
+  const storage = getStorage();
+  if (!storage) return { isValid: false, expiresAt: null, remainingMs: null };
+  
+  const stored = storage.getItem(KEYPAIR_STORAGE_KEY);
+  if (!stored) return { isValid: false, expiresAt: null, remainingMs: null };
+  
+  try {
+    const data: StoredKeypair = JSON.parse(stored);
+    const expiresAt = data.expiresAt || (data.createdAt + SESSION_EXPIRY_MS);
+    const remainingMs = expiresAt - Date.now();
+    
+    return {
+      isValid: remainingMs > 0,
+      expiresAt,
+      remainingMs: remainingMs > 0 ? remainingMs : 0,
+    };
+  } catch {
+    return { isValid: false, expiresAt: null, remainingMs: null };
+  }
+}
+
+/**
+ * Refresh session expiry (extend the session)
+ */
+export function refreshSession(extensionMs: number = SESSION_EXPIRY_MS): boolean {
+  const storage = getStorage();
+  if (!storage) return false;
+  
+  const stored = storage.getItem(KEYPAIR_STORAGE_KEY);
+  if (!stored) return false;
+  
+  try {
+    const data: StoredKeypair = JSON.parse(stored);
+    
+    // Check if already expired
+    if (isKeypairExpired(data)) {
+      clearKeypair();
+      return false;
+    }
+    
+    // Extend expiry
+    data.expiresAt = Date.now() + extensionMs;
+    storage.setItem(KEYPAIR_STORAGE_KEY, JSON.stringify(data));
+    console.log('Session refreshed, new expiry in', Math.round(extensionMs / 60000), 'minutes');
+    return true;
+  } catch {
+    return false;
+  }
 }

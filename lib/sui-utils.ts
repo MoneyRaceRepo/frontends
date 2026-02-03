@@ -38,11 +38,11 @@ async function rpcCall(method: string, params: any[]) {
 export async function getUserCoins(
   address: string,
   coinType: string = '0x2::sui::SUI'
-) {
+): Promise<{ objectId: string; balance: string; digest: string }[]> {
   try {
     const result = await rpcCall('suix_getCoins', [address, coinType, null, null]);
 
-    return result.data.map((coin: any) => ({
+    return result.data.map((coin: { coinObjectId: string; balance: string; digest: string }) => ({
       objectId: coin.coinObjectId,
       balance: coin.balance,
       digest: coin.digest,

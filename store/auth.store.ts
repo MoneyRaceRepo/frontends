@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { clearKeypair, isSessionValid, getSessionExpiryInfo, refreshSession } from '@/lib/keypair';
 
 interface User {
   id: string;
@@ -21,11 +22,13 @@ interface AuthState {
   login: (user: User, token: string) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
+  checkSession: () => boolean;
+  refreshUserSession: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -42,17 +45,49 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
         }),
 
-      logout: () =>
+      logout: () => {
+        // Clear keypair from storage when logging out
+        clearKeypair();
         set({
           user: null,
           token: null,
           isAuthenticated: false,
-        }),
+        });
+      },
 
       setLoading: (loading) => set({ isLoading: loading }),
+
+      // Check if session (keypair) is still valid
+      checkSession: () => {
+        const state = get();
+        if (!state.isAuthenticated) return false;
+        
+        const valid = isSessionValid();
+        if (!valid && state.isAuthenticated) {
+          // Session expired, logout user
+          console.warn('Session expired, logging out...');
+          get().logout();
+          return false;
+        }
+        return valid;
+      },
+
+      // Refresh user session
+      refreshUserSession: () => {
+        const state = get();
+        if (!state.isAuthenticated) return false;
+        return refreshSession();
+      },
     }),
     {
       name: 'auth-storage',
+      // Use sessionStorage for auth data too (more secure)
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
+
+// Helper hook to get session info
+export function getAuthSessionInfo() {
+  return getSessionExpiryInfo();
+}

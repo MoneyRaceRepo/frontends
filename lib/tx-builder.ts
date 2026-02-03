@@ -5,7 +5,7 @@
 
 import { Transaction } from '@mysten/sui/transactions';
 import { bcs } from '@mysten/sui/bcs';
-import { keccak_256 } from '@noble/hashes/sha3.js';
+import { keccak_256 } from '@noble/hashes/sha3';
 
 // Contract Package ID
 const PACKAGE_ID = process.env.NEXT_PUBLIC_PACKAGE_ID || '';
@@ -31,8 +31,7 @@ export function buildJoinRoomTx(params: {
   // Hash password if provided, otherwise use empty vector
   let passwordBytes: Uint8Array;
   if (params.password) {
-    const hash = keccak_256(new TextEncoder().encode(params.password));
-    passwordBytes = hash; // keccak_256 already returns Uint8Array
+    passwordBytes = keccak_256(new TextEncoder().encode(params.password));
   } else {
     passwordBytes = new Uint8Array(0); // Empty Uint8Array for public rooms
   }

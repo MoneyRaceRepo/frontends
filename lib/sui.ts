@@ -6,6 +6,7 @@ const network = (process.env.NEXT_PUBLIC_SUI_NETWORK as 'testnet' | 'devnet' | '
 // Initialize Sui client (using JSON RPC client for SDK v2)
 export const suiClient = new SuiJsonRpcClient({
   url: getJsonRpcFullnodeUrl(network),
+  network: network,
 });
 
 // Package and contract IDs (will be set after deployment)

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@mysten/sui": "^2.1.0",
-    "@noble/hashes": "^2.0.1",
+    "@noble/hashes": "^1.7.1",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-select": "^2.0.0",
