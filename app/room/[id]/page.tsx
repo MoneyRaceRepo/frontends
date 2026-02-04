@@ -11,6 +11,11 @@ import { DEFAULT_COIN_TYPE, MIN_BALANCE_USDC, SUI_CLOCK_ID } from "@/lib/constan
 import { buildJoinRoomTx, buildDepositTx, buildClaimTx } from "@/lib/tx-builder";
 import { buildSponsoredTx } from "@/lib/zklogin-tx";
 import { LottieLoading, LottieSpinner } from "@/components/ui/LottieLoading";
+import { useToast } from "@/components/ui/Toast";
+import { HiUserGroup, HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiCurrencyDollar, HiArrowRight, HiTrendingUp, HiCalendar, HiRefresh, HiKey, HiSparkles, HiLightBulb, HiShare, HiClipboardCopy, HiDocumentText } from "react-icons/hi";
+import { HiBeaker, HiBan, HiPlay, HiOutlineClipboardCopy } from "react-icons/hi";
+import { FaUsers, FaPiggyBank, FaTrophy, FaWallet, FaCoins, FaCheckCircle, FaUserPlus, FaGift, FaChartLine, FaBolt, FaDoorOpen, FaMedal } from "react-icons/fa";
+import { RiCoinsFill, RiVipCrownFill, RiTimeFill, RiHistoryFill, RiMedal2Fill, RiMedal2Line } from "react-icons/ri";
 
 // Helper function to format time ago
 function getTimeAgo(date: Date): string {
@@ -54,6 +59,7 @@ export default function RoomDetail() {
   const params = useParams();
   const roomId = params?.id as string;
   const { user } = useAuthStore();
+  const toast = useToast();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -246,8 +252,9 @@ export default function RoomDetail() {
         });
         setParticipants(formattedParticipants);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch participants:', error);
+      // Silent fail - participants list will be empty
     }
   };
 
@@ -258,8 +265,9 @@ export default function RoomDetail() {
       if (response.success && response.history) {
         setHistory(response.history);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch history:', error);
+      // Silent fail - history will be empty
     }
   };
 
@@ -268,9 +276,10 @@ export default function RoomDetail() {
     try {
       const data = await usdcAPI.getBalance(user.address);
       setUsdcBalance(data.balanceFormatted || "0.00");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch USDC balance:', error);
       setUsdcBalance("0.00");
+      // Silent fail - balance will show 0.00
     }
   };
 
@@ -371,6 +380,7 @@ export default function RoomDetail() {
       const errorMsg = err.response?.data?.error || err.message || "Failed to fetch room data";
       const hint = err.response?.data?.hint || "";
       setError(`${errorMsg}${hint ? ` - ${hint}` : ''}`);
+      toast.error("Connection Error", "Unable to load room data. Please check your connection.");
       // Use mock data as fallback
     }
   };
@@ -485,7 +495,7 @@ export default function RoomDetail() {
           localStorage.setItem(`playerPosition_${roomId}_${user.address}`, positionId);
           setPlayerPositionId(positionId);
           setIsJoined(true);
-          alert("Successfully joined the room!");
+          toast.success("Welcome!", "Successfully joined the room!");
           fetchRoomData(); // Refresh room data
           fetchParticipants(); // Refresh participants
         } else {
@@ -498,6 +508,7 @@ export default function RoomDetail() {
       console.error("Join room error:", err);
       const errorMsg = err.response?.data?.error || err.message || "Failed to join room";
       setError(errorMsg);
+      toast.error("Join Failed", "Unable to join room. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -573,7 +584,7 @@ export default function RoomDetail() {
       const response = await executeSponsoredTransaction(txBytes, userSignature);
 
       if (response.success) {
-        alert("Deposit successful!");
+        toast.success("Deposit Successful!", "Your deposit has been recorded.");
         window.location.reload(); // Refresh page to update all data
       } else {
         setError(response.error || "Failed to deposit");
@@ -582,6 +593,7 @@ export default function RoomDetail() {
       console.error("Deposit error:", err);
       const errorMsg = err.response?.data?.error || err.message || "Failed to deposit";
       setError(errorMsg);
+      toast.error("Deposit Failed", "Unable to process deposit. Please check your balance and try again.");
     } finally {
       setLoading(false);
     }
@@ -635,7 +647,7 @@ export default function RoomDetail() {
       });
 
       if (response.success) {
-        alert("Rewards claimed successfully!");
+        toast.success("Congratulations! 🎉", "Rewards claimed successfully!");
         window.location.reload(); // Refresh page to update all data
       } else {
         setError(response.error || "Failed to claim rewards");
@@ -643,6 +655,7 @@ export default function RoomDetail() {
     } catch (err: any) {
       console.error("Claim error:", err);
       setError(err.response?.data?.error || err.message || "Failed to claim rewards");
+      toast.error("Claim Failed", "Unable to claim rewards. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -661,7 +674,7 @@ export default function RoomDetail() {
       const response = await roomAPI.finalizeRoom(roomId);
 
       if (response.success) {
-        alert("Room finalized successfully! Page will refresh...");
+        toast.success("Room Finalized!", "Page will refresh shortly...");
         // Refresh the page to get updated room status
         setTimeout(() => {
           window.location.reload();
@@ -673,6 +686,7 @@ export default function RoomDetail() {
     } catch (err: any) {
       console.error("Finalize error:", err);
       setError(err.response?.data?.error || err.message || "Failed to finalize room");
+      toast.error("Finalize Failed", "Unable to finalize room. Please try again.");
       setLoading(false);
     }
   };
@@ -684,19 +698,22 @@ export default function RoomDetail() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-2">
-              <h1
-                className="text-[#4A3000] text-3xl font-bold tracking-wider"
-                style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-              >
-                {room.name}
-              </h1>
+              <div>
+                <h1
+                  className="text-[#4A3000] text-3xl font-bold tracking-wider"
+                  style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+                >
+                  {room.name}
+                </h1>
+                <p className="text-[#8B6914]/60 text-sm font-mono mt-1">#{roomId?.slice(0, 10)}...{roomId?.slice(-6)}</p>
+              </div>
               {room.isPrivate && (
-                <span className="text-sm px-3 py-1.5 rounded-full bg-[#F0E6D0] text-[#6B4F0F] font-bold border-2 border-[#C9A86C]">
-                  🔒 Private
+                <span className="text-sm px-3 py-1.5 rounded-full bg-[#F0E6D0] text-[#6B4F0F] font-bold border-2 border-[#C9A86C] flex items-center gap-1">
+                  <HiLockClosed className="w-4 h-4" /> Private
                 </span>
               )}
               <span
-                className={`text-xs px-3 py-1.5 rounded-full font-bold border-2 ${
+                className={`text-xs px-3 py-1.5 rounded-full font-bold border-2 flex items-center gap-1 ${
                   room.currentPeriod >= room.totalPeriods
                     ? "bg-[#E8F4E8] text-[#2D5A2D] border-[#9BC49B]"
                     : room.status === "active"
@@ -707,12 +724,12 @@ export default function RoomDetail() {
                 }`}
               >
                 {room.currentPeriod >= room.totalPeriods
-                  ? "✓ Completed"
+                  ? <><FaCheckCircle className="w-3 h-3" /> Completed</>
                   : room.status === "active"
-                  ? "⚡ Active"
+                  ? <><HiSparkles className="w-3 h-3" /> Active</>
                   : room.status === "pending"
-                  ? "⏳ Pending"
-                  : "🏁 Finished"}
+                  ? <><HiClock className="w-3 h-3" /> Pending</>
+                  : <><FaTrophy className="w-3 h-3" /> Finished</>}
               </span>
             </div>
             <p className="text-[#6B4F0F] flex items-center gap-2">
@@ -723,15 +740,15 @@ export default function RoomDetail() {
             {user?.address && (
               <div className="mt-3 flex items-center gap-4">
                 <div className="bg-gradient-to-r from-[#FFB347]/20 to-[#E89530]/20 px-4 py-2 rounded-xl border-2 border-[#D4A84B]/40">
-                  <span className="text-sm font-bold text-[#4A3000]">
-                    💰 {usdcBalance} USDC
+                  <span className="text-sm font-bold text-[#4A3000] flex items-center gap-1">
+                    <FaWallet className="w-4 h-4" /> {usdcBalance} USDC
                   </span>
                 </div>
                 <button
                   onClick={() => router.push("/mint")}
-                  className="text-xs text-[#8B6914] hover:text-[#6B4F0F] underline font-semibold"
+                  className="text-xs text-[#8B6914] hover:text-[#6B4F0F] underline font-semibold flex items-center gap-1"
                 >
-                  Get more USDC →
+                  Get more USDC <HiArrowRight className="w-3 h-3" />
                 </button>
               </div>
             )}
@@ -763,7 +780,7 @@ export default function RoomDetail() {
         {error && !roomData && (
           <div className="mb-6 bg-gradient-to-r from-yellow-100 to-orange-100 border-3 border-yellow-400 rounded-2xl p-6 shadow-lg">
             <h3 className="font-bold text-yellow-900 mb-2 text-lg flex items-center gap-2">
-              <span className="text-2xl">⚠️</span>
+              <HiExclamationCircle className="w-6 h-6 text-yellow-700" />
               Unable to Load Room Data
             </h3>
             <p className="text-yellow-800 text-sm mb-3">{error}</p>
@@ -772,7 +789,7 @@ export default function RoomDetail() {
                 Room ID: <code className="bg-yellow-200 px-2 py-1 rounded font-mono">{roomId}</code>
               </p>
               <p className="text-xs text-yellow-700 flex items-start gap-2 mt-2">
-                <span>💡</span>
+                <HiLightBulb className="w-5 h-5 text-yellow-600 flex-shrink-0" />
                 <span>Tip: Make sure the room has been created on the blockchain first. Using mock data for now.</span>
               </p>
             </div>
@@ -783,7 +800,7 @@ export default function RoomDetail() {
         {periodInfo?.isTestMode && (
           <div className="mb-6 bg-gradient-to-r from-orange-100 to-red-100 border-3 border-orange-400 rounded-2xl p-4 shadow-lg">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🧪</span>
+              <HiBeaker className="w-10 h-10 text-orange-600" />
               <div>
                 <span className="text-orange-900 font-bold text-lg">TEST MODE</span>
                 <p className="text-sm text-orange-800 mt-1">
@@ -798,10 +815,10 @@ export default function RoomDetail() {
         <div className="grid md:grid-cols-4 gap-4 mb-6">
           {/* Progress Card */}
           <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">📊 Progress</div>
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><FaChartLine className="w-3 h-3" /> Progress</div>
             <div className="text-2xl font-bold text-[#4A3000] mb-3">
               {room.currentPeriod >= room.totalPeriods ? (
-                <span className="text-green-700">✓ Completed</span>
+                <span className="text-green-700 flex items-center gap-1"><HiCheckCircle className="w-5 h-5" /> Completed</span>
               ) : (
                 <>{periodInfo?.isTestMode ? 'Period' : 'Week'} {room.currentPeriod}/{room.totalPeriods}</>
               )}
@@ -825,15 +842,15 @@ export default function RoomDetail() {
               </div>
             )}
             {room.currentPeriod >= room.totalPeriods && (
-              <div className="mt-3 text-xs text-green-700 font-bold">
-                🎉 All {room.totalPeriods} periods completed!
+              <div className="mt-3 text-xs text-green-700 font-bold flex items-center gap-1">
+                <HiSparkles className="w-4 h-4" /> All {room.totalPeriods} periods completed!
               </div>
             )}
           </div>
 
           {/* Total Pool Card */}
           <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#8B6914]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">💎 Total Pool</div>
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><RiCoinsFill className="w-3 h-3" /> Total Pool</div>
             <div className="text-2xl font-bold text-[#4A3000]">
               ${participants.reduce((sum, p) => sum + p.totalDeposit, 0).toFixed(2)}
             </div>
@@ -841,13 +858,13 @@ export default function RoomDetail() {
 
           {/* Reward Pool Card */}
           <div className="bg-gradient-to-br from-[#E8DCC0] to-[#D4C4A0] rounded-2xl p-6 border-3 border-[#C9A86C]/60 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">🏆 Reward Pool</div>
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><FaTrophy className="w-3 h-3" /> Reward Pool</div>
             <div className="text-2xl font-bold text-[#4A3000]">${room.rewardPool}</div>
           </div>
 
           {/* Participants Card */}
           <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E0D4B8] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">👥 Participants</div>
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><HiUserGroup className="w-3 h-3" /> Participants</div>
             <div className="text-2xl font-bold text-[#4A3000]">{participants.length}</div>
           </div>
         </div>
@@ -859,7 +876,7 @@ export default function RoomDetail() {
             {error && (
               <div className="bg-[#FDF2F2] border-3 border-[#E5A0A0] rounded-xl p-4 shadow-lg">
                 <div className="flex items-start gap-2">
-                  <span className="text-2xl">❌</span>
+                  <HiExclamationCircle className="w-6 h-6 text-[#8B3030] flex-shrink-0" />
                   <p className="text-[#8B3030] text-sm font-medium flex-1">{error}</p>
                 </div>
               </div>
@@ -876,11 +893,11 @@ export default function RoomDetail() {
                 <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
                   <div className="mb-4">
                     <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
-                      <span className="text-2xl">🚪</span>
+                      <FaUserPlus className="w-6 h-6 text-[#D4A84B]" />
                       Join This Room
                     </h3>
                     <p className="text-sm text-[#6B4F0F] mt-1">
-                      {room.isPrivate ? "🔒 Private Room - Password Required" : "Join to start saving and compete with others"}
+                      {room.isPrivate ? <><HiLockClosed className="inline w-4 h-4" /> Private Room - Password Required</> : "Join to start saving and compete with others"}
                     </p>
                   </div>
                   <div className="space-y-4">
@@ -888,7 +905,7 @@ export default function RoomDetail() {
                     {roomAlreadyStarted ? (
                       <div className="bg-gradient-to-r from-orange-100 to-red-100 border-2 border-orange-400 rounded-xl p-4">
                         <p className="text-sm text-orange-900 font-bold flex items-center gap-2">
-                          <span>⏰</span>
+                          <HiClock className="w-5 h-5" />
                           Room Already Started
                         </p>
                         <p className="text-xs text-orange-700 mt-2">
@@ -898,7 +915,7 @@ export default function RoomDetail() {
                     ) : (
                       <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/60 rounded-xl p-4">
                         <p className="text-sm text-[#4A3000] font-semibold flex items-center gap-2">
-                          <span>💡</span>
+                          <HiLightBulb className="w-5 h-5 text-[#D4A84B]" />
                           Joining requires an initial deposit of <strong>${requiredAmount}</strong>
                         </p>
                       </div>
@@ -908,7 +925,7 @@ export default function RoomDetail() {
                     {!roomAlreadyStarted && !hasEnoughBalance && (
                       <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4">
                         <p className="text-sm text-[#8B3030] font-bold flex items-center gap-2">
-                          <span>⚠️</span>
+                          <HiExclamationCircle className="w-5 h-5" />
                           Insufficient Balance
                         </p>
                         <p className="text-xs text-[#A04040] mt-2">
@@ -920,14 +937,14 @@ export default function RoomDetail() {
                     {/* Password input for private rooms - only show if room hasn't started */}
                     {!roomAlreadyStarted && room.isPrivate && (
                       <div>
-                        <label className="text-sm font-semibold text-[#4A3000] mb-2 block">🔑 Room Password</label>
+                        <label className="text-sm font-semibold text-[#4A3000] mb-2 flex items-center gap-1"><HiKey className="w-4 h-4" /> Room Password</label>
                         <input
                           type="password"
                           placeholder="Enter room password"
                           value={roomPassword}
                           onChange={(e) => setRoomPassword(e.target.value)}
                           disabled={loading}
-                          className="w-full px-4 py-3 bg-white border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
+                          className="w-full px-4 py-3 bg-[#FBF7EC] border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
                         />
                       </div>
                     )}
@@ -938,7 +955,7 @@ export default function RoomDetail() {
                       className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-[#D4A84B]"
                     >
                       {roomAlreadyStarted
-                        ? "🚫 Room Already Started"
+                        ? <><HiBan className="inline w-5 h-5" /> Room Already Started</>
                         : loading
                           ? (
                             <span className="flex items-center justify-center gap-2">
@@ -946,16 +963,16 @@ export default function RoomDetail() {
                               Joining...
                             </span>
                           )
-                          : `🚀 Join Room + Deposit $${requiredAmount}`
+                          : <><FaUserPlus className="inline w-5 h-5 mr-1" /> Join Room + Deposit ${requiredAmount}</>
                       }
                     </button>
                     <div className="space-y-1">
                       <p className="text-xs text-[#6B4F0F] flex items-center gap-1">
-                        <span>⚡</span>
+                        <FaBolt className="w-3 h-3" />
                         <span>Gasless transaction powered by zkLogin</span>
                       </p>
                       <p className="text-xs text-green-700 font-semibold flex items-center gap-1">
-                        <span>💰</span>
+                        <FaWallet className="w-3 h-3" />
                         <span>Your balance: <strong>${usdcBalance} USDC</strong></span>
                       </p>
                     </div>
@@ -969,7 +986,7 @@ export default function RoomDetail() {
               <div className="bg-gradient-to-br from-[#E8F4E8] to-[#D8E8D8] rounded-2xl p-6 border-3 border-[#9BC49B] shadow-xl">
                 <div className="mb-4">
                   <h3 className="text-[#2D5A2D] font-bold text-lg flex items-center gap-2">
-                    <span className="text-2xl">🎉</span>
+                    <FaGift className="w-6 h-6 text-green-600" />
                     Room Completed!
                   </h3>
                   <p className="text-sm text-[#3D6A3D] mt-1">All {room.totalPeriods} periods have been completed</p>
@@ -978,7 +995,7 @@ export default function RoomDetail() {
                   {hasClaimed ? (
                     <div className="bg-[#F0F8F0] border-2 border-[#9BC49B] rounded-xl p-5 text-center">
                       <p className="text-[#2D5A2D] font-bold text-lg flex items-center justify-center gap-2">
-                        <span className="text-2xl">✅</span>
+                        <FaCheckCircle className="w-6 h-6 text-green-600" />
                         Rewards Claimed!
                       </p>
                       <p className="text-sm text-[#3D6A3D] mt-2">
@@ -993,7 +1010,7 @@ export default function RoomDetail() {
                           <strong>Congratulations!</strong> You have completed this saving room.
                         </p>
                         <p className="text-xs text-[#6B4F0F]">
-                          ✅ Room has been finalized. You can now claim your rewards!
+                          <HiCheckCircle className="inline w-4 h-4 text-green-600 mr-1" /> Room has been finalized. You can now claim your rewards!
                         </p>
                       </div>
 
@@ -1007,7 +1024,7 @@ export default function RoomDetail() {
                             <LottieSpinner size={24} />
                             Processing...
                           </span>
-                        ) : "💰 Claim Rewards"}
+                        ) : <><FaGift className="inline w-5 h-5 mr-1" /> Claim Rewards</>}
                       </button>
                     </>
                   ) : !showFinalizeButton ? (
@@ -1034,7 +1051,7 @@ export default function RoomDetail() {
                       {error && (
                         <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-3">
                           <p className="text-xs text-[#8B3030] font-semibold flex items-center gap-2">
-                            <span>⚠️</span>
+                            <HiExclamationCircle className="w-4 h-4" />
                             {error}
                           </p>
                         </div>
@@ -1050,7 +1067,7 @@ export default function RoomDetail() {
                             <LottieSpinner size={24} />
                             Finalizing...
                           </span>
-                        ) : "🔧 Finalize Room"}
+                        ) : <><HiRefresh className="inline w-5 h-5 mr-1" /> Finalize Room</>}
                       </button>
 
                       <p className="text-xs text-green-700 text-center font-medium">
@@ -1067,7 +1084,7 @@ export default function RoomDetail() {
               <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
                 <div className="mb-4">
                   <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
-                    <span className="text-2xl">💰</span>
+                    <FaCoins className="w-6 h-6 text-[#D4A84B]" />
                     Make Deposit
                   </h3>
                   <p className="text-sm text-[#6B4F0F] mt-1">
@@ -1077,7 +1094,7 @@ export default function RoomDetail() {
                 <div className="space-y-4">
                   <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-3">
                     <p className="text-xs text-[#2D5A2D] font-semibold flex items-center gap-2">
-                      <span>✓</span>
+                      <HiCheckCircle className="w-4 h-4" />
                       You have joined this room
                     </p>
                   </div>
@@ -1100,7 +1117,7 @@ export default function RoomDetail() {
                       </div>
                       {periodInfo.isTestMode && (
                         <div className="text-xs text-[#8B6914] mt-2 font-semibold flex items-center gap-1">
-                          <span>🧪</span>
+                          <HiBeaker className="w-4 h-4" />
                           Test mode: 1 min periods
                         </div>
                       )}
@@ -1111,7 +1128,7 @@ export default function RoomDetail() {
                   {hasDepositedThisPeriod ? (
                     <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-5 text-center">
                       <p className="text-[#2D5A2D] font-bold text-lg flex items-center justify-center gap-2">
-                        <span className="text-2xl">✅</span>
+                        <FaCheckCircle className="w-6 h-6 text-green-600" />
                         Deposit Complete!
                       </p>
                       <p className="text-sm text-[#3D6A3D] mt-2">
@@ -1140,7 +1157,7 @@ export default function RoomDetail() {
                         {!hasEnoughBalance && (
                           <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4">
                             <p className="text-sm text-[#8B3030] font-bold flex items-center gap-2">
-                              <span>⚠️</span>
+                              <HiExclamationCircle className="w-5 h-5" />
                               Insufficient Balance
                             </p>
                             <p className="text-xs text-[#A04040] mt-2">
@@ -1159,7 +1176,7 @@ export default function RoomDetail() {
                               <LottieSpinner size={24} />
                               Processing...
                             </span>
-                          ) : `💰 Deposit $${requiredAmount} for ${periodInfo?.isTestMode ? 'Period' : 'Week'} ${periodInfo?.currentPeriod || 0}`}
+                          ) : <><FaCoins className="inline w-5 h-5 mr-1" /> Deposit ${requiredAmount} for ${periodInfo?.isTestMode ? 'Period' : 'Week'} ${periodInfo?.currentPeriod || 0}</>}
                         </button>
                       </>
                     );
@@ -1167,11 +1184,11 @@ export default function RoomDetail() {
 
                   <div className="space-y-1 pt-2">
                     <p className="text-xs text-[#6B4F0F] flex items-center gap-1">
-                      <span>⚡</span>
+                      <FaBolt className="w-3 h-3" />
                       <span>Gasless transaction powered by zkLogin</span>
                     </p>
                     <p className="text-xs text-green-700 font-semibold flex items-center gap-1">
-                      <span>✓</span>
+                      <HiCheckCircle className="w-3 h-3" />
                       <span>Your wallet is connected. USDC tokens will be used automatically</span>
                     </p>
                   </div>
@@ -1184,7 +1201,7 @@ export default function RoomDetail() {
               <div className="bg-gradient-to-br from-gray-200/60 to-gray-300/40 rounded-2xl p-6 border-3 border-gray-400 shadow-xl">
                 <div className="mb-4">
                   <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
-                    <span className="text-2xl">🏁</span>
+                    <FaTrophy className="w-6 h-6 text-gray-500" />
                     Claim Rewards
                   </h3>
                   <p className="text-sm text-gray-700 mt-1">Room has ended</p>
@@ -1202,7 +1219,7 @@ export default function RoomDetail() {
             <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E8DCC0] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-xl">
               <div className="mb-4">
                 <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
-                  <span className="text-2xl">📤</span>
+                  <HiShare className="w-6 h-6 text-[#D4A84B]" />
                   Share Room
                 </h3>
                 <p className="text-sm text-[#6B4F0F] mt-1">Invite friends to join</p>
@@ -1211,7 +1228,7 @@ export default function RoomDetail() {
                 <input
                   readOnly
                   value={typeof window !== 'undefined' ? `${window.location.origin}/room/${roomId}` : `/room/${roomId}`}
-                  className="flex-1 px-4 py-3 bg-white border-2 border-[#C9A86C]/40 rounded-xl text-sm text-[#4A3000] font-mono focus:outline-none"
+                  className="flex-1 px-4 py-3 bg-[#FBF7EC] border-2 border-[#C9A86C]/40 rounded-xl text-sm text-[#4A3000] font-mono focus:outline-none"
                 />
                 <button
                   onClick={() => {
@@ -1219,7 +1236,7 @@ export default function RoomDetail() {
                       navigator.clipboard.writeText(
                         `${window.location.origin}/room/${roomId}`
                       );
-                      alert("Link copied!");
+                      toast.success("Copied!", "Room link copied to clipboard");
                     }
                   }}
                   className="px-5 py-3 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
@@ -1254,7 +1271,7 @@ export default function RoomDetail() {
                         : 'bg-[#8B6914]/20 text-[#6B4F0F] hover:bg-[#8B6914]/30'
                     }`}
                   >
-                    {tab === 'participants' ? '👥 Participants' : tab === 'details' ? '📋 Details' : '📜 History'}
+                    {tab === 'participants' ? <><HiUserGroup className="inline w-4 h-4 mr-1" /> Participants</> : tab === 'details' ? <><HiClipboardCopy className="inline w-4 h-4 mr-1" /> Details</> : <><RiHistoryFill className="inline w-4 h-4 mr-1" /> History</>}
                   </button>
                 ))}
               </div>
@@ -1265,7 +1282,7 @@ export default function RoomDetail() {
               <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
-                    <span className="text-2xl">🏆</span>
+                    <FaTrophy className="w-6 h-6 text-[#D4A84B]" />
                     Leaderboard
                   </h3>
                   <p className="text-sm text-[#6B4F0F] mt-1">Ranked by consistency score ({participants.length} participants)</p>
@@ -1288,11 +1305,14 @@ export default function RoomDetail() {
                           }`}
                         >
                           <div className="flex items-center gap-4">
-                            <span className={`font-bold text-2xl ${
-                              index === 0 ? 'text-[#8B6914]' : index === 1 ? 'text-[#707070]' : index === 2 ? 'text-[#A07030]' : 'text-[#6B4F0F]'
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                              index === 0 ? 'bg-gradient-to-br from-[#FFD700] to-[#FFA500] text-white shadow-lg' 
+                              : index === 1 ? 'bg-gradient-to-br from-[#C0C0C0] to-[#A0A0A0] text-white shadow-md' 
+                              : index === 2 ? 'bg-gradient-to-br from-[#CD7F32] to-[#A0522D] text-white shadow-md' 
+                              : 'bg-[#E8D5A8] text-[#6B4F0F]'
                             }`}>
-                              {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                            </span>
+                              {index === 0 ? <RiVipCrownFill className="w-5 h-5" /> : index === 1 ? '2' : index === 2 ? '3' : index + 1}
+                            </div>
                             <div>
                               <div className="font-mono text-sm font-semibold text-[#4A3000]">
                                 {participant.address.slice(0, 8)}...{participant.address.slice(-6)}
@@ -1312,7 +1332,7 @@ export default function RoomDetail() {
                       ))
                   ) : (
                     <div className="text-center py-12 bg-white/60 rounded-xl border-2 border-dashed border-[#D4A84B]/40">
-                      <span className="text-5xl">🐜</span>
+                      <HiUserGroup className="w-12 h-12 text-[#D4A84B]/60 mx-auto" />
                       <p className="text-[#6B4F0F] font-semibold mt-4">No participants yet</p>
                       <p className="text-sm text-[#8B6914] mt-2">Be the first to join this room!</p>
                     </div>
@@ -1326,7 +1346,7 @@ export default function RoomDetail() {
               <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#8B6914]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
-                    <span className="text-2xl">📋</span>
+                    <HiClipboardCopy className="w-6 h-6 text-[#D4A84B]" />
                     Room Details
                   </h3>
                 </div>
@@ -1362,7 +1382,7 @@ export default function RoomDetail() {
               <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E8DCC0] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
-                    <span className="text-2xl">📜</span>
+                    <RiHistoryFill className="w-6 h-6 text-[#D4A84B]" />
                     Transaction History
                   </h3>
                   <p className="text-sm text-[#6B4F0F] mt-1">{history.length} transactions</p>
@@ -1383,9 +1403,9 @@ export default function RoomDetail() {
                           <div>
                             <div className="font-bold flex items-center gap-2 mb-1">
                               {tx.type === 'join' ? (
-                                <span className="text-[#2D5A2D]">🎉 Joined Room</span>
+                                <span className="text-[#2D5A2D] flex items-center gap-1"><FaUserPlus className="w-4 h-4" /> Joined Room</span>
                               ) : (
-                                <span className="text-[#4A3000]">💰 Deposit</span>
+                                <span className="text-[#4A3000] flex items-center gap-1"><FaCoins className="w-4 h-4" /> Deposit</span>
                               )}
                             </div>
                             <div className="text-[#6B4F0F] font-mono text-xs mb-1">
@@ -1412,7 +1432,7 @@ export default function RoomDetail() {
                     })
                   ) : (
                     <div className="text-center py-12 bg-[#F8F4EC] rounded-xl border-2 border-dashed border-[#D4A84B]/40">
-                      <span className="text-5xl">📭</span>
+                      <RiHistoryFill className="w-12 h-12 text-[#D4A84B]/60 mx-auto" />
                       <p className="text-[#4A3000] font-semibold mt-4">No transactions yet</p>
                       <p className="text-sm text-[#6B4F0F] mt-2">Join this room to start!</p>
                     </div>

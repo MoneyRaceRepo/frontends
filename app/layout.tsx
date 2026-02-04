@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { GoogleOAuthProvider } from "@/components/GoogleOAuthProvider";
 import { WalletProvider } from "@/components/WalletProvider";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <WalletProvider>
           <GoogleOAuthProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </GoogleOAuthProvider>
         </WalletProvider>
       </body>

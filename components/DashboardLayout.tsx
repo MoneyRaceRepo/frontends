@@ -8,6 +8,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { useDisconnectWallet } from "@mysten/dapp-kit";
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
 import { CirclePlusIcon } from "@/components/icons/CirclePlusIcon";
+import { HiEmojiSad, HiOutlineLogout } from "react-icons/hi";
+import { FaTrophy, FaCoins, FaBullseye } from "react-icons/fa";
 
 // Menu items for sidebar
 const menuItems = [
@@ -285,17 +287,16 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
       </header>
 
       {/* Main Content */}
-      <main className="ml-60 sm:ml-64 lg:ml-72 pt-[76px] lg:pt-[84px] min-h-screen">
-        {/* Content Area */}
-        <div className="px-4 lg:px-8 py-6 pb-24 lg:pb-32">
-          <div className="bg-[#C9A86C]/60 rounded-2xl lg:rounded-3xl border-2 lg:border-4 border-[#8B6914]/30 shadow-xl">
-            {/* Main Content with padding */}
-            <div className="px-4 lg:px-8 py-4 lg:py-6 min-h-[350px] lg:min-h-[400px] max-h-[calc(100vh-180px)] lg:max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+      <main className="ml-60 sm:ml-64 lg:ml-72 pt-[76px] lg:pt-[84px] h-screen">
+        {/* Content Area - fixed height aligned with sidebar sign out */}
+        <div className="h-[calc(100vh-76px)] lg:h-[calc(100vh-84px)] px-4 lg:px-8 pt-6 pb-10">
+          <div className="h-full bg-[#C9A86C]/60 rounded-2xl lg:rounded-3xl border-2 lg:border-4 border-[#8B6914]/30 shadow-xl flex flex-col">
+            {/* Main Content with padding - scrollable inside */}
+            <div className="flex-1 px-4 lg:px-8 py-4 lg:py-6 overflow-y-auto custom-scrollbar">
               {children}
             </div>
           </div>
         </div>
-
       </main>
 
       {/* Sign Out Confirmation Modal */}
@@ -336,7 +337,7 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
                     </div>
                     {/* Sad emoji bubble */}
                     <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-[#D4A84B]">
-                      <span className="text-lg">😢</span>
+                      <HiEmojiSad className="w-5 h-5 text-[#E89530]" />
                     </div>
                   </div>
                 </div>
@@ -351,13 +352,13 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
                 
                 {/* Message */}
                 <p className="text-center text-[#5A4520] text-sm mb-6 leading-relaxed">
-                  We&apos;ll miss you! Your savings journey will be waiting when you return. 🏆
+                  We&apos;ll miss you! Your savings journey will be waiting when you return. <FaTrophy className="w-4 h-4 text-[#E89530] inline-block ml-1" />
                 </p>
                 
                 {/* Divider with coin icons */}
                 <div className="flex items-center justify-center gap-2 mb-6">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8B6914]/50 to-transparent" />
-                  <span className="text-lg">💰</span>
+                  <FaCoins className="w-5 h-5 text-[#8B6914]" />
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8B6914]/50 to-transparent" />
                 </div>
                 
@@ -370,7 +371,7 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
                     style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
                   >
                     <span className="text-xs flex items-center justify-center gap-2">
-                      <span>🎯</span> Stay & Save
+                      <FaBullseye className="w-4 h-4" /> Stay & Save
                     </span>
                   </button>
                   
@@ -381,9 +382,7 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
                     style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
                   >
                     <span className="text-[10px] flex items-center justify-center gap-2">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                      </svg>
+                      <HiOutlineLogout className="w-4 h-4" />
                       Sign Out
                     </span>
                   </button>

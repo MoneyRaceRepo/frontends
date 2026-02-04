@@ -6,9 +6,10 @@ import Image from "next/image";
 import { aiAPI, roomAPI, convertCreateRoomData, convertCreateRoomDataTestMode } from "@/lib/api";
 import DashboardLayout from "@/components/DashboardLayout";
 import { LottieLoading, LottieSpinner } from "@/components/ui/LottieLoading";
-import { HiHome, HiCalendar, HiCurrencyDollar, HiLockClosed, HiBeaker, HiSparkles, HiClipboardCopy, HiCheck, HiArrowRight, HiLightBulb } from "react-icons/hi";
-import { FaRobot, FaBrain, FaShieldAlt, FaBalanceScale, FaRocket, FaCopy, FaKey } from "react-icons/fa";
-import { RiAiGenerate, RiLockPasswordFill } from "react-icons/ri";
+import { useToast } from "@/components/ui/Toast";
+import { HiHome, HiCalendar, HiCurrencyDollar, HiLockClosed, HiBeaker, HiSparkles, HiClipboardCopy, HiCheck, HiArrowRight, HiLightBulb, HiGlobeAlt, HiExclamationCircle, HiDocumentText, HiCheckCircle } from "react-icons/hi";
+import { FaRobot, FaBrain, FaShieldAlt, FaBalanceScale, FaRocket, FaCopy, FaKey, FaBullseye, FaGem, FaTrophy, FaCalendarCheck, FaInfoCircle } from "react-icons/fa";
+import { RiAiGenerate, RiLockPasswordFill, RiShieldCheckFill } from "react-icons/ri";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -22,6 +23,7 @@ interface Strategy {
 
 export default function CreateRoom() {
   const router = useRouter();
+  const toast = useToast();
   const [currentStep, setCurrentStep] = useState<Step>(1);
 
   // Form data
@@ -68,6 +70,7 @@ export default function CreateRoom() {
     } catch (err: any) {
       console.error("AI recommendation error:", err);
       setError(err.message || "Failed to get AI recommendations. Using default strategies.");
+      toast.warning("AI Unavailable", "Using default strategies. You can still create your room!");
       setStrategies([
         { id: 0, name: "Stable", expectedReturn: 3.5, risk: 15, description: "Conservative approach with stable, low-risk deposits." },
         { id: 1, name: "Balanced", expectedReturn: 6.5, risk: 35, description: "Moderate risk-reward balance." },
@@ -82,6 +85,7 @@ export default function CreateRoom() {
   const handleCreateRoom = async () => {
     if (selectedStrategy === null) {
       setError("Please select a strategy");
+      toast.warning("Missing Selection", "Please select a strategy before continuing.");
       return;
     }
 
@@ -112,15 +116,18 @@ export default function CreateRoom() {
           setCreatedRoomId(response.roomId);
           setShowPasswordModal(true);
         } else {
-          alert("Room created successfully!");
+          toast.success("Room Created!", "Your savings room is ready.");
           router.push("/dashboard");
         }
       } else {
         setError(response.error || "Failed to create room");
+        toast.error("Creation Failed", response.error || "Unable to create room. Please try again.");
       }
     } catch (err: any) {
       console.error("Create room error:", err);
-      setError(err.response?.data?.error || err.message || "Failed to create room");
+      const errorMsg = err.response?.data?.error || err.message || "Failed to create room";
+      setError(errorMsg);
+      toast.error("Error", "Something went wrong. Please check your details and try again.");
     } finally {
       setCreateLoading(false);
     }
@@ -132,7 +139,7 @@ export default function CreateRoom() {
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#E8D5A8] rounded-2xl p-6 max-w-lg w-full shadow-2xl border-4 border-[#D4A84B]">
-            <h3 className="text-[#4A3000] font-bold text-xl mb-2">🔒 Private Room Created!</h3>
+            <h3 className="text-[#4A3000] font-bold text-xl mb-2 flex items-center gap-2"><HiLockClosed className="w-6 h-6" /> Private Room Created!</h3>
             <p className="text-[#6B4F0F] text-sm mb-4">Save this information - it will only be shown once</p>
 
             <div className="bg-[#FFB347]/20 border-2 border-[#FFB347]/40 rounded-xl p-4 mb-4">
@@ -168,9 +175,9 @@ export default function CreateRoom() {
                 const inviteText = `Join my private room!\n\nRoom ID: ${createdRoomId}\nPassword: ${generatedPassword}`;
                 navigator.clipboard.writeText(inviteText);
               }}
-              className="w-full mb-3 py-2 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all"
+              className="w-full mb-3 py-2 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all flex items-center justify-center gap-2"
             >
-              📋 Copy Both (Room ID + Password)
+              <HiClipboardCopy className="w-5 h-5" /> Copy Both (Room ID + Password)
             </button>
 
             <button
@@ -186,41 +193,20 @@ export default function CreateRoom() {
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto">
-        {/* Header with Mascot and Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2
-                className="text-[#4A3000] text-xl font-bold tracking-wider mb-2"
-                style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-              >
-                CREATE ROOM
-              </h2>
-              <p className="text-[#6B4F0F] text-sm">Start your savings journey with Money Race!</p>
-            </div>
-            <div className="animate-wiggle">
-              <Image
-                src="/mascotsemut.png"
-                alt="Ant Mascot"
-                width={80}
-                height={80}
-                className="drop-shadow-lg"
-              />
-              <style jsx>{`
-                @keyframes wiggle {
-                  0%, 100% { transform: rotate(-3deg); }
-                  50% { transform: rotate(3deg); }
-                }
-                .animate-wiggle {
-                  animation: wiggle 2s ease-in-out infinite;
-                }
-              `}</style>
-            </div>
-          </div>
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h2
+            className="text-[#4A3000] text-xl font-bold tracking-wider mb-2"
+            style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+          >
+            CREATE ROOM
+          </h2>
+          <p className="text-[#6B4F0F] text-sm">Start your savings journey with Money Race!</p>
+        </div>
 
-          {/* Progress Steps */}
-          <div className="bg-[#C9A86C]/40 rounded-2xl p-6 border-2 border-[#8B6914]/30">
+        {/* Progress Steps */}
+        <div className="bg-[#C9A86C]/40 rounded-2xl p-4 border-2 border-[#8B6914]/30 mb-6">
             <div className="flex items-center justify-between">
               {[
                 { step: 1, label: "Basic Info" },
@@ -231,7 +217,7 @@ export default function CreateRoom() {
                 <div key={step} className="flex items-center flex-1">
                   <div className="flex flex-col items-center w-full">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 border-3 ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 border-2 ${
                         currentStep === step
                           ? "bg-gradient-to-br from-[#FFB347] to-[#E89530] text-[#4A3000] shadow-xl scale-110 border-[#FFB347]"
                           : currentStep > step
@@ -239,16 +225,16 @@ export default function CreateRoom() {
                             : "bg-[#8B6914]/30 text-[#4A3000]/50 border-[#8B6914]/40"
                       }`}
                     >
-                      {currentStep > step ? "✓" : step}
+                      {currentStep > step ? <HiCheckCircle className="w-5 h-5" /> : step}
                     </div>
-                    <span className={`mt-2 text-xs font-semibold transition-all ${
+                    <span className={`mt-1 text-xs font-semibold transition-all ${
                       currentStep >= step ? "text-[#4A3000]" : "text-[#4A3000]/50"
                     }`}>
                       {label}
                     </span>
                   </div>
                   {index < 3 && (
-                    <div className={`h-1 flex-1 mx-3 rounded-full transition-all duration-300 ${
+                    <div className={`h-1 flex-1 mx-2 rounded-full transition-all duration-300 ${
                       currentStep > step ? "bg-gradient-to-r from-[#8B6914] to-[#8B6914]" : "bg-[#8B6914]/30"
                     }`} />
                   )}
@@ -256,14 +242,13 @@ export default function CreateRoom() {
               ))}
             </div>
           </div>
-        </div>
 
         {/* Step 1: Basic Information */}
         {currentStep === 1 && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl">📝</span>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg">
+                <HiClipboardCopy className="w-5 h-5 text-[#4A3000]" />
               </div>
               <div>
                 <h3 className="text-[#4A3000] font-bold text-lg">Basic Information</h3>
@@ -272,9 +257,9 @@ export default function CreateRoom() {
             </div>
 
             {/* Room Name */}
-            <div className="bg-[#8B6914]/10 rounded-xl p-5 border-2 border-[#8B6914]/20">
-              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-3">
-                <span className="text-xl">🏠</span>
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#D4A84B]/50 shadow-md">
+              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-2">
+                <HiHome className="w-5 h-5 text-[#8B6914]" />
                 Room Name
               </label>
               <input
@@ -282,14 +267,14 @@ export default function CreateRoom() {
                 placeholder="e.g., Emergency Fund, Vacation Savings"
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
-                className="w-full px-4 py-3.5 bg-[#E8D5A8] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/50 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
+                className="w-full px-4 py-3 bg-[#FBF7EC] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
               />
             </div>
 
             {/* Duration */}
-            <div className="bg-[#8B6914]/10 rounded-xl p-5 border-2 border-[#8B6914]/20">
-              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-3">
-                <span className="text-xl">📅</span>
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#D4A84B]/50 shadow-md">
+              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-2">
+                <HiCalendar className="w-5 h-5 text-[#8B6914]" />
                 Duration (weeks)
               </label>
               <input
@@ -297,15 +282,15 @@ export default function CreateRoom() {
                 placeholder="e.g., 12"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="w-full px-4 py-3.5 bg-[#E8D5A8] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/50 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
+                className="w-full px-4 py-3 bg-[#FBF7EC] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
               />
-              <p className="text-xs text-[#6B4F0F] mt-2">How many weeks will this savings goal last?</p>
+              <p className="text-xs text-[#6B4F0F] mt-1">How many weeks will this savings goal last?</p>
             </div>
 
             {/* Weekly Target */}
-            <div className="bg-[#8B6914]/10 rounded-xl p-5 border-2 border-[#8B6914]/20">
-              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-3">
-                <span className="text-xl">💰</span>
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#D4A84B]/50 shadow-md">
+              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-2">
+                <HiCurrencyDollar className="w-5 h-5 text-[#8B6914]" />
                 Weekly Target ($)
               </label>
               <div className="relative">
@@ -315,20 +300,20 @@ export default function CreateRoom() {
                   placeholder="100"
                   value={weeklyTarget}
                   onChange={(e) => setWeeklyTarget(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3.5 bg-[#E8D5A8] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/50 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#FBF7EC] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
                 />
               </div>
               {duration && weeklyTarget && (
-                <div className="mt-3 bg-[#FFB347]/20 rounded-lg p-3 border border-[#FFB347]/40">
-                  <p className="text-sm text-[#4A3000] font-semibold">
-                    💡 Total Goal: <span className="text-green-700">${Number(weeklyTarget) * Number(duration)}</span>
+                <div className="mt-2 bg-[#FFB347]/20 rounded-lg p-2 border border-[#FFB347]/40">
+                  <p className="text-sm text-[#4A3000] font-semibold flex items-center gap-2">
+                    <HiLightBulb className="w-4 h-4 text-[#8B6914]" /> Total Goal: <span className="text-green-700">${Number(weeklyTarget) * Number(duration)}</span>
                   </p>
                 </div>
               )}
             </div>
 
             {/* Privacy Settings */}
-            <div className="bg-[#8B6914]/10 rounded-xl p-5 border-2 border-[#8B6914]/20">
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#D4A84B]/50 shadow-md">
               <label className="flex items-center gap-3 cursor-pointer group">
                 <div className="relative">
                   <input
@@ -340,7 +325,7 @@ export default function CreateRoom() {
                 </div>
                 <div className="flex-1">
                   <span className="text-[#4A3000] font-semibold flex items-center gap-2">
-                    <span className="text-xl">🔒</span>
+                    <HiLockClosed className="w-5 h-5 text-[#8B6914]" />
                     Make this a private room
                   </span>
                   <p className="text-xs text-[#6B4F0F] mt-1">Only people with password can join</p>
@@ -349,7 +334,7 @@ export default function CreateRoom() {
               {isPrivate && (
                 <div className="mt-4 bg-gradient-to-r from-[#D4A84B]/20 to-[#FFB347]/20 border-2 border-[#D4A84B]/40 rounded-xl p-4">
                   <p className="text-[#4A3000] text-sm font-semibold flex items-center gap-2">
-                    <span className="text-lg">🔐</span>
+                    <RiLockPasswordFill className="w-5 h-5 text-[#8B6914]" />
                     A secure password will be automatically generated for this room
                   </p>
                 </div>
@@ -357,28 +342,28 @@ export default function CreateRoom() {
             </div>
 
             {/* Test Mode */}
-            <div className="bg-gradient-to-br from-[#FFB347]/10 to-[#E89530]/10 rounded-xl p-5 border-2 border-[#FFB347]/30">
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#FFB347]/60 shadow-md">
               <label className="flex items-center gap-3 cursor-pointer group">
                 <div className="relative">
                   <input
                     type="checkbox"
                     checked={isTestMode}
                     onChange={(e) => setIsTestMode(e.target.checked)}
-                    className="w-6 h-6 accent-[#FF8C00] cursor-pointer"
+                    className="w-5 h-5 accent-[#FF8C00] cursor-pointer"
                   />
                 </div>
                 <div className="flex-1">
                   <span className="text-[#4A3000] font-semibold flex items-center gap-2">
-                    <span className="text-xl">🧪</span>
+                    <HiBeaker className="w-5 h-5 text-[#FF8C00]" />
                     Enable Test Mode
                   </span>
                   <p className="text-xs text-[#6B4F0F] mt-1">1 minute periods for quick testing</p>
                 </div>
               </label>
               {isTestMode && (
-                <div className="mt-4 bg-[#FF8C00]/20 border-2 border-[#FF8C00]/40 rounded-xl p-4">
+                <div className="mt-3 bg-[#FF8C00]/20 border-2 border-[#FF8C00]/40 rounded-xl p-3">
                   <p className="text-[#4A3000] text-sm font-semibold flex items-center gap-2">
-                    <span className="text-lg">⚡</span>
+                    <HiSparkles className="w-5 h-5 text-[#FF8C00]" />
                     Each "week" will be only 1 minute long for testing purposes
                   </p>
                 </div>
@@ -388,20 +373,20 @@ export default function CreateRoom() {
             <button
               onClick={() => setCurrentStep(2)}
               disabled={!roomName || !duration || !weeklyTarget}
-              className="w-full py-3 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
             >
-              Next: AI Strategy
+              Next: AI Strategy <HiArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Step 2: AI Strategy */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Header with AI Icon */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-                <span className="text-2xl">🤖</span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg animate-pulse">
+                <FaRobot className="w-5 h-5 text-[#4A3000]" />
               </div>
               <div>
                 <h3 className="text-[#4A3000] font-bold text-lg">AI Strategy Recommendation</h3>
@@ -410,48 +395,48 @@ export default function CreateRoom() {
             </div>
 
             {/* Info Card */}
-            <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/20 rounded-xl p-5 border-2 border-[#FFB347]/40">
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#FFB347]/50 shadow-md">
               <p className="text-[#4A3000] text-sm font-medium flex items-start gap-2">
-                <span className="text-xl">💡</span>
+                <HiLightBulb className="w-5 h-5 text-[#FFB347] flex-shrink-0" />
                 <span>Describe your saving goals and let our AI recommend the best investment strategy tailored to your needs!</span>
               </p>
             </div>
 
             {error && (
               <div className="bg-red-100 border-2 border-red-300 rounded-xl p-4 flex items-start gap-3">
-                <span className="text-2xl">⚠️</span>
+                <HiExclamationCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
                 <p className="text-red-800 text-sm font-medium flex-1">{error}</p>
               </div>
             )}
 
             {/* AI Prompt Input */}
-            <div className="bg-[#8B6914]/10 rounded-xl p-5 border-2 border-[#8B6914]/20">
-              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-3">
-                <span className="text-xl">✨</span>
+            <div className="bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#D4A84B]/50 shadow-md">
+              <label className="flex items-center gap-2 text-[#4A3000] font-semibold mb-2">
+                <HiSparkles className="w-5 h-5 text-[#FFB347]" />
                 What are you saving for?
               </label>
               <textarea
                 placeholder="Example: I want to build an emergency fund for unexpected expenses. I prefer low risk and steady growth to ensure my savings are safe."
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                rows={6}
-                className="w-full px-4 py-3.5 bg-[#E8D5A8] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/50 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all resize-none"
+                rows={4}
+                className="w-full px-4 py-3 bg-[#FBF7EC] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all resize-none"
               />
-              <p className="text-xs text-[#6B4F0F] mt-2">Be specific about your goals, timeline, and risk tolerance for better recommendations</p>
+              <p className="text-xs text-[#6B4F0F] mt-1">Be specific about your goals, timeline, and risk tolerance for better recommendations</p>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setCurrentStep(1)}
                 disabled={aiLoading}
-                className="flex-1 py-3 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all disabled:opacity-50 text-sm"
               >
                 Back
               </button>
               <button
                 onClick={handleAISubmit}
                 disabled={!aiPrompt || aiLoading}
-                className="flex-1 py-3 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {aiLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -466,11 +451,11 @@ export default function CreateRoom() {
 
         {/* Step 3: Choose Strategy */}
         {currentStep === 3 && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl">🎯</span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg">
+                <FaBullseye className="w-5 h-5 text-[#4A3000]" />
               </div>
               <div>
                 <h3 className="text-[#4A3000] font-bold text-lg">AI Recommendations</h3>
@@ -479,22 +464,22 @@ export default function CreateRoom() {
             </div>
 
             {/* User Prompt Display */}
-            <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#FFB347]/20 rounded-xl p-4 border-2 border-[#D4A84B]/40">
-              <p className="text-xs text-[#6B4F0F] font-semibold mb-1">📋 Based on your goal:</p>
+            <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#FFB347]/20 rounded-xl p-3 border-2 border-[#D4A84B]/40">
+              <p className="text-xs text-[#6B4F0F] font-semibold mb-1 flex items-center gap-1"><HiDocumentText className="w-4 h-4" /> Based on your goal:</p>
               <p className="text-sm text-[#4A3000] italic line-clamp-2">"{aiPrompt}"</p>
             </div>
 
             {error && (
               <div className="bg-red-100 border-2 border-red-300 rounded-xl p-4 flex items-start gap-3">
-                <span className="text-2xl">⚠️</span>
+                <HiExclamationCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
                 <p className="text-red-800 text-sm font-medium flex-1">{error}</p>
               </div>
             )}
 
             {/* Strategy Cards */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {strategies.map((strategy, index) => {
-                const icons = ["🛡️", "⚖️", "🚀"];
+                const StrategyIcons = [FaShieldAlt, FaBalanceScale, FaRocket];
                 const gradients = [
                   "from-green-50 to-emerald-50 border-green-300",
                   "from-blue-50 to-cyan-50 border-blue-300",
@@ -504,42 +489,42 @@ export default function CreateRoom() {
                   <div
                     key={strategy.id}
                     onClick={() => setSelectedStrategy(strategy.id)}
-                    className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border-3 ${
+                    className={`p-3 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
                       selectedStrategy === strategy.id
-                        ? "bg-gradient-to-br from-[#FFB347] to-[#E89530] border-[#D4A84B] shadow-2xl scale-[1.02]"
-                        : `bg-gradient-to-br ${gradients[index] || 'from-gray-50 to-gray-50 border-gray-300'} hover:shadow-lg hover:scale-[1.01]`
+                        ? "bg-gradient-to-br from-[#FFB347] to-[#E89530] border-[#D4A84B] shadow-lg scale-[1.01]"
+                        : `bg-gradient-to-br ${gradients[index] || 'from-gray-50 to-gray-50 border-gray-300'} hover:shadow-md hover:scale-[1.01]`
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">{icons[index] || "💎"}</span>
-                        <h4 className={`font-bold text-xl ${selectedStrategy === strategy.id ? 'text-white' : 'text-[#4A3000]'}`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        {(() => { const IconComponent = StrategyIcons[index] || FaGem; return <IconComponent className={`w-6 h-6 ${selectedStrategy === strategy.id ? 'text-white' : 'text-[#4A3000]'}`} />; })()}
+                        <h4 className={`font-bold text-base ${selectedStrategy === strategy.id ? 'text-white' : 'text-[#4A3000]'}`}>
                           {strategy.name}
                         </h4>
                       </div>
                       {selectedStrategy === strategy.id && (
-                        <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg animate-bounce">
-                          <span className="text-green-600 font-bold text-xl">✓</span>
+                        <div className="bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                          <span className="text-green-600 font-bold text-sm">✓</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex gap-4 mb-3">
-                      <div className={`flex-1 px-4 py-3 rounded-xl ${selectedStrategy === strategy.id ? 'bg-white/20' : 'bg-white/80'}`}>
-                        <span className={`text-xs font-semibold block mb-1 ${selectedStrategy === strategy.id ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Expected Return</span>
-                        <p className={`text-lg font-bold ${selectedStrategy === strategy.id ? 'text-white' : 'text-green-700'}`}>
+                    <div className="flex gap-3 mb-2">
+                      <div className={`flex-1 px-3 py-2 rounded-lg ${selectedStrategy === strategy.id ? 'bg-white/20' : 'bg-white/80'}`}>
+                        <span className={`text-xs font-semibold block ${selectedStrategy === strategy.id ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Expected Return</span>
+                        <p className={`text-sm font-bold ${selectedStrategy === strategy.id ? 'text-white' : 'text-green-700'}`}>
                           +{strategy.expectedReturn}%
                         </p>
                       </div>
-                      <div className={`flex-1 px-4 py-3 rounded-xl ${selectedStrategy === strategy.id ? 'bg-white/20' : 'bg-white/80'}`}>
-                        <span className={`text-xs font-semibold block mb-1 ${selectedStrategy === strategy.id ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Risk Level</span>
-                        <p className={`text-lg font-bold ${selectedStrategy === strategy.id ? 'text-white' : 'text-orange-700'}`}>
+                      <div className={`flex-1 px-3 py-2 rounded-lg ${selectedStrategy === strategy.id ? 'bg-white/20' : 'bg-white/80'}`}>
+                        <span className={`text-xs font-semibold block ${selectedStrategy === strategy.id ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Risk Level</span>
+                        <p className={`text-sm font-bold ${selectedStrategy === strategy.id ? 'text-white' : 'text-orange-700'}`}>
                           {strategy.risk}%
                         </p>
                       </div>
                     </div>
 
-                    <p className={`text-sm leading-relaxed ${selectedStrategy === strategy.id ? 'text-white/90' : 'text-[#6B4F0F]'}`}>
+                    <p className={`text-xs leading-relaxed ${selectedStrategy === strategy.id ? 'text-white/90' : 'text-[#6B4F0F]'}`}>
                       {strategy.description}
                     </p>
                   </div>
@@ -550,14 +535,14 @@ export default function CreateRoom() {
             <div className="flex gap-3">
               <button
                 onClick={() => setCurrentStep(2)}
-                className="flex-1 py-3 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all"
+                className="flex-1 py-2.5 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all text-sm"
               >
                 Back
               </button>
               <button
                 onClick={() => setCurrentStep(4)}
                 disabled={selectedStrategy === null}
-                className="flex-1 py-3 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 Next: Review
               </button>
@@ -567,81 +552,70 @@ export default function CreateRoom() {
 
         {/* Step 4: Review */}
         {currentStep === 4 && (
-          <div className="space-y-6">
-            {/* Header with Mascot */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-2xl">✅</span>
-                </div>
-                <div>
-                  <h3 className="text-[#4A3000] font-bold text-lg">Review & Confirm</h3>
-                  <p className="text-[#6B4F0F] text-xs">Double check your room settings</p>
-                </div>
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg">
+                <HiCheckCircle className="w-5 h-5 text-[#4A3000]" />
               </div>
-              <div className="animate-wiggle">
-                <Image
-                  src="/mascotsemut.png"
-                  alt="Ant Mascot"
-                  width={60}
-                  height={60}
-                  className="drop-shadow-lg"
-                />
+              <div>
+                <h3 className="text-[#4A3000] font-bold text-lg">Review & Confirm</h3>
+                <p className="text-[#6B4F0F] text-xs">Double check your room settings</p>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-100 border-2 border-red-300 rounded-xl p-4 flex items-start gap-3">
-                <span className="text-2xl">⚠️</span>
+              <div className="bg-red-100 border-2 border-red-300 rounded-xl p-3 flex items-start gap-3">
+                <HiExclamationCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                 <p className="text-red-800 text-sm font-medium flex-1">{error}</p>
               </div>
             )}
 
             {/* Room Details Card */}
-            <div className="bg-gradient-to-br from-[#E8D5A8] to-[#D4A84B]/30 rounded-2xl p-6 border-3 border-[#D4A84B]/50 shadow-xl">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b-2 border-dashed border-[#8B6914]/30">
+            <div className="bg-gradient-to-br from-[#E8D5A8] to-[#D4A84B]/30 rounded-xl p-4 border-2 border-[#D4A84B]/50 shadow-lg">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b-2 border-dashed border-[#8B6914]/30">
                   <span className="text-[#6B4F0F] font-medium flex items-center gap-2">
-                    <span className="text-lg">🏠</span> Room Name
+                    <HiHome className="w-5 h-5 text-[#8B6914]" /> Room Name
                   </span>
                   <span className="font-bold text-[#4A3000] text-lg">{roomName}</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/60 rounded-xl p-4 border-2 border-[#8B6914]/20">
-                    <span className="text-[#6B4F0F] text-xs font-semibold block mb-1">📅 Duration</span>
-                    <span className="font-bold text-[#4A3000] text-xl">{duration} weeks</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/60 rounded-xl p-3 border-2 border-[#8B6914]/20">
+                    <span className="text-[#6B4F0F] text-xs font-semibold block mb-1 flex items-center gap-1"><HiCalendar className="w-4 h-4" /> Duration</span>
+                    <span className="font-bold text-[#4A3000] text-lg">{duration} weeks</span>
                   </div>
-                  <div className="bg-white/60 rounded-xl p-4 border-2 border-[#8B6914]/20">
-                    <span className="text-[#6B4F0F] text-xs font-semibold block mb-1">💰 Weekly Target</span>
-                    <span className="font-bold text-[#4A3000] text-xl">${weeklyTarget}</span>
+                  <div className="bg-white/60 rounded-xl p-3 border-2 border-[#8B6914]/20">
+                    <span className="text-[#6B4F0F] text-xs font-semibold block mb-1 flex items-center gap-1"><HiCurrencyDollar className="w-4 h-4" /> Weekly Target</span>
+                    <span className="font-bold text-[#4A3000] text-lg">${weeklyTarget}</span>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 border-2 border-green-300">
-                  <span className="text-green-800 text-xs font-semibold block mb-1">🎯 Total Goal</span>
-                  <span className="font-bold text-green-700 text-2xl">${Number(weeklyTarget) * Number(duration)}</span>
+                <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-3 border-2 border-green-300">
+                  <span className="text-green-800 text-xs font-semibold block mb-1 flex items-center gap-1"><FaBullseye className="w-4 h-4" /> Total Goal</span>
+                  <span className="font-bold text-green-700 text-xl">${Number(weeklyTarget) * Number(duration)}</span>
                 </div>
 
-                <div className="flex items-center justify-between py-3 border-b-2 border-dashed border-[#8B6914]/30">
+                <div className="flex items-center justify-between py-2 border-b-2 border-dashed border-[#8B6914]/30">
                   <span className="text-[#6B4F0F] font-medium">Strategy</span>
-                  <span className="font-bold text-[#4A3000] bg-[#FFB347]/30 px-4 py-2 rounded-lg">
+                  <span className="font-bold text-[#4A3000] bg-[#FFB347]/30 px-3 py-1.5 rounded-lg text-sm">
                     {strategies.find(s => s.id === selectedStrategy)?.name || "N/A"}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between py-3 border-b-2 border-dashed border-[#8B6914]/30">
+                <div className="flex items-center justify-between py-2 border-b-2 border-dashed border-[#8B6914]/30">
                   <span className="text-[#6B4F0F] font-medium">Room Type</span>
                   <span className="font-bold text-[#4A3000] flex items-center gap-2">
-                    {isPrivate ? "🔒 Private" : "🌐 Public"}
+                    {isPrivate ? <><HiLockClosed className="w-4 h-4" /> Private</> : <><HiGlobeAlt className="w-4 h-4" /> Public</>}
                   </span>
                 </div>
 
                 {isTestMode && (
-                  <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center justify-between py-2">
                     <span className="text-[#6B4F0F] font-medium">Mode</span>
-                    <span className="font-bold text-[#E89530] bg-[#FF8C00]/20 px-4 py-2 rounded-lg">
-                      🧪 Test Mode
+                    <span className="font-bold text-[#E89530] bg-[#FF8C00]/20 px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm">
+                      <HiBeaker className="w-4 h-4" /> Test Mode
                     </span>
                   </div>
                 )}
@@ -649,21 +623,21 @@ export default function CreateRoom() {
             </div>
 
             {/* Important Notice */}
-            <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/20 border-2 border-[#FFB347]/60 rounded-xl p-5">
-              <p className="font-bold text-[#4A3000] mb-3 flex items-center gap-2 text-lg">
-                <span>⚠️</span> Important Information
+            <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/20 border-2 border-[#FFB347]/60 rounded-xl p-3">
+              <p className="font-bold text-[#4A3000] mb-2 flex items-center gap-2 text-sm">
+                <FaInfoCircle className="w-4 h-4 text-[#E89530]" /> Important Information
               </p>
-              <ul className="text-[#4A3000] text-sm space-y-2">
+              <ul className="text-[#4A3000] text-xs space-y-1.5">
                 <li className="flex items-start gap-2">
-                  <span className="text-base">🔒</span>
+                  <RiShieldCheckFill className="w-4 h-4 text-[#8B6914] flex-shrink-0 mt-0.5" />
                   <span>Strategy cannot be changed once the room starts</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-base">📅</span>
+                  <FaCalendarCheck className="w-4 h-4 text-[#8B6914] flex-shrink-0 mt-0.5" />
                   <span>Deposits must be made weekly to stay eligible</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-base">🏆</span>
+                  <FaTrophy className="w-4 h-4 text-[#8B6914] flex-shrink-0 mt-0.5" />
                   <span>Rewards distributed at the end based on consistency</span>
                 </li>
               </ul>
@@ -673,14 +647,14 @@ export default function CreateRoom() {
               <button
                 onClick={() => setCurrentStep(3)}
                 disabled={createLoading}
-                className="flex-1 py-3 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all disabled:opacity-50"
+                className="flex-1 py-2.5 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-lg border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all disabled:opacity-50 text-sm"
               >
                 Back
               </button>
               <button
                 onClick={handleCreateRoom}
                 disabled={createLoading}
-                className="flex-1 py-3 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 bg-gradient-to-b from-[#FFB347] to-[#FF8C00] text-[#4A3000] font-bold rounded-lg border-2 border-[#D4A84B] shadow-lg hover:from-[#FFC967] hover:to-[#FFA030] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {createLoading ? (
                   <span className="flex items-center justify-center gap-2">

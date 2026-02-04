@@ -7,6 +7,7 @@ import { roomAPI } from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 import DashboardLayout from "@/components/DashboardLayout";
 import { LottieLoading } from "@/components/ui/LottieLoading";
+import { useToast } from "@/components/ui/Toast";
 import { HiSearch, HiUserGroup, HiLockClosed, HiCurrencyDollar, HiCheckCircle, HiArrowRight, HiSparkles, HiTrendingUp, HiPlus, HiClock } from "react-icons/hi";
 import { RiCoinsFill, RiVipCrownFill, RiGamepadFill } from "react-icons/ri";
 import { FaUsers, FaPiggyBank, FaTrophy, FaGift } from "react-icons/fa";
@@ -14,6 +15,7 @@ import { FaUsers, FaPiggyBank, FaTrophy, FaGift } from "react-icons/fa";
 interface Room {
   id: string;
   name: string;
+  roomAddress: string;
   duration: number;
   weeklyTarget: number;
   currentPeriod: number;
@@ -28,6 +30,7 @@ interface Room {
 
 interface MyRoom {
   roomId: string;
+  name: string;
   vaultId: string | null;
   playerPositionId: string;
   joinedAt: number;
@@ -42,6 +45,7 @@ interface MyRoom {
 
 export default function Dashboard() {
   const router = useRouter();
+  const toast = useToast();
   const { user } = useAuthStore();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [myRooms, setMyRooms] = useState<MyRoom[]>([]);
@@ -68,9 +72,10 @@ export default function Dashboard() {
       } else {
         setMyRooms([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch my rooms:', error);
       setMyRooms([]);
+      // Silent fail for initial load, show toast only on manual refresh
     } finally {
       setMyRoomsLoading(false);
     }
@@ -99,7 +104,8 @@ export default function Dashboard() {
 
           return {
             id: room.roomId,
-            name: `Room #${room.roomId.slice(0, 8)}...`,
+            name: room.name || `Savings Room`,
+            roomAddress: room.roomId,
             duration: totalPeriods,
             weeklyTarget: room.depositAmount / 1_000_000 || 0,
             currentPeriod: displayPeriod,
@@ -149,10 +155,21 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout activeRoomId={activeRoomId}>
+      {/* Header */}
+      <div className="mb-6">
+        <h2
+          className="text-[#4A3000] text-xl font-bold tracking-wider mb-2"
+          style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+        >
+          DASHBOARD
+        </h2>
+        <p className="text-[#6B4F0F] text-sm">Manage your savings rooms and track progress</p>
+      </div>
+
       {/* Search Bar - Full width, prominent */}
       <div className="mb-6">
         <div className="relative w-full">
-          <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-[#8B7040]">
+          <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-[#8B6914]">
             <HiSearch className="w-5 h-5" />
           </span>
           <input
@@ -160,7 +177,7 @@ export default function Dashboard() {
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-14 pr-6 py-3.5 bg-[#5A4520]/20 rounded-xl text-[#4A3000] placeholder-[#8B7040] focus:outline-none focus:ring-2 focus:ring-[#8B6914]/50 transition-all border border-[#8B6914]/30"
+            className="w-full pl-14 pr-6 py-3.5 bg-[#F5EDD8] rounded-xl text-[#4A3000] placeholder-[#8B6914]/60 focus:outline-none focus:ring-2 focus:ring-[#D4A84B] transition-all border-2 border-[#D4A84B]/40 shadow-sm"
           />
         </div>
       </div>
@@ -260,6 +277,7 @@ export default function Dashboard() {
                       
                       <div>
                         <h3 className="font-bold text-[#4A3000] text-lg group-hover:text-[#8B6914] transition-colors">{room.name}</h3>
+                        <p className="text-[#8B6914]/60 text-xs font-mono mb-1">#{room.roomAddress?.slice(0, 10)}...{room.roomAddress?.slice(-6)}</p>
                         <p className="text-[#8B6914]/70 text-sm"><FaUsers className="inline w-3 h-3 mr-1" />{room.participants} participants • {room.strategy}</p>
                       </div>
                     </div>
@@ -374,7 +392,7 @@ export default function Dashboard() {
                       
                       <div>
                         <h3 className="font-bold text-[#4A3000] text-lg flex items-center gap-2 group-hover:text-[#8B6914] transition-colors">
-                          Savings Room
+                          {room.name || `Room #${room.roomId.slice(0, 8)}`}
                           {room.isPrivate && (
                             <span className="px-2 py-0.5 bg-purple-500 text-white text-[10px] rounded-full flex items-center gap-1 shadow">
                               <HiLockClosed className="w-3 h-3" />
@@ -437,9 +455,7 @@ export default function Dashboard() {
                   {/* Action hint on hover */}
                   <div className="mt-4 flex items-center justify-center gap-2 text-[#8B6914]/60 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
                     <span>Click to view details</span>
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
-                    </svg>
+                    <HiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               );
@@ -492,22 +508,21 @@ export default function Dashboard() {
                   <div className="flex items-start gap-3">
                     {/* Room Icon */}
                     <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                      </svg>
+                      <HiCheckCircle className="w-6 h-6 text-white" />
                     </div>
                     
                     <div>
                       <h3 className="font-bold text-[#4A3000] text-lg group-hover:text-[#8B6914] transition-colors">{room.name}</h3>
-                      <p className="text-[#8B6914]/70 text-sm">{room.participants} participants • {room.strategy}</p>
+                      <p className="text-[#8B6914]/60 text-xs font-mono mb-1">#{room.roomAddress?.slice(0, 10)}...{room.roomAddress?.slice(-6)}</p>
+                      <p className="text-[#8B6914]/70 text-sm"><FaUsers className="inline w-3 h-3 mr-1" />{room.participants} participants • {room.strategy}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-xs font-bold rounded-full shadow-lg">
-                      Ended
+                    <span className="px-3 py-1.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
+                      <HiCheckCircle className="w-3 h-3" /> Ended
                     </span>
-                    <button className="px-5 py-2 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-full text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
-                      Claim Rewards
+                    <button className="px-5 py-2 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-full text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-1">
+                      <FaGift className="w-3 h-3" /> Claim Rewards
                     </button>
                   </div>
                 </div>

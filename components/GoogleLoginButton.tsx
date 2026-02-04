@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { getOrCreateKeypairForUser } from '@/lib/keypair';
 import { LottieLoading } from '@/components/ui/LottieLoading';
+import { useToast } from '@/components/ui/Toast';
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
@@ -17,6 +18,7 @@ export function GoogleLoginButton({ onSuccess, onError }: GoogleLoginButtonProps
   const router = useRouter();
   const { login } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleSuccess = async (credentialResponse: any) => {
     try {
@@ -80,7 +82,7 @@ export function GoogleLoginButton({ onSuccess, onError }: GoogleLoginButtonProps
       if (onError) {
         onError(errorMsg);
       } else {
-        alert(`Login failed: ${errorMsg}`);
+        toast.error("Login Failed", errorMsg);
       }
     } finally {
       setLoading(false);
@@ -94,7 +96,7 @@ export function GoogleLoginButton({ onSuccess, onError }: GoogleLoginButtonProps
     if (onError) {
       onError(errorMsg);
     } else {
-      alert(errorMsg);
+      toast.error("Login Failed", errorMsg);
     }
   };
 

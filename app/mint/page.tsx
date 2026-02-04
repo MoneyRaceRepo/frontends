@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { usdcAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { LottieLoading, LottieSpinner } from '@/components/ui/LottieLoading';
+import { useToast } from '@/components/ui/Toast';
 import { HiArrowLeft, HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiSparkles } from 'react-icons/hi';
 import { FaCoins, FaWallet, FaGift, FaFaucet, FaMagic } from 'react-icons/fa';
 import { RiCoinsFill, RiExchangeDollarFill } from 'react-icons/ri';
 
 export default function MintUSDCPage() {
   const router = useRouter();
+  const toast = useToast();
   const { user } = useAuthStore();
   const [authLoading, setAuthLoading] = useState(true);
   const [amount, setAmount] = useState<string>('100');
@@ -42,6 +44,7 @@ export default function MintUSDCPage() {
       setBalanceFormatted(data.balanceFormatted);
     } catch (err: any) {
       console.error('Failed to fetch balance:', err);
+      // Silent fail - balance will show 0
     }
   };
 
@@ -61,17 +64,20 @@ export default function MintUSDCPage() {
 
     if (!user?.address) {
       setError('User address not found. Please log in again.');
+      toast.error('Not Logged In', 'Please log in to mint USDC.');
       return;
     }
 
     const amountNumber = parseFloat(amount);
     if (isNaN(amountNumber) || amountNumber <= 0) {
       setError('Please enter a valid amount');
+      toast.warning('Invalid Amount', 'Please enter a valid amount greater than 0.');
       return;
     }
 
     if (amountNumber > 1000) {
       setError('Maximum mint amount is 1000 USDC');
+      toast.warning('Limit Exceeded', 'Maximum mint amount is 1000 USDC per request.');
       return;
     }
 
@@ -84,6 +90,7 @@ export default function MintUSDCPage() {
 
       if (result.success) {
         setSuccess(`Successfully minted ${amountNumber} USDC to your wallet!`);
+        toast.success('Mint Successful!', `${amountNumber} USDC has been added to your wallet.`);
         setAmount('100'); // Reset to default
 
         // Refresh balance and cooldown info
@@ -93,10 +100,13 @@ export default function MintUSDCPage() {
         }, 1000);
       } else {
         setError(result.error || 'Failed to mint USDC');
+        toast.error('Mint Failed', result.error || 'Unable to mint USDC. Please try again later.');
       }
     } catch (err: any) {
       console.error('Mint error:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to mint USDC');
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to mint USDC';
+      setError(errorMsg);
+      toast.error('Error', 'Something went wrong during minting. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +132,7 @@ export default function MintUSDCPage() {
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#2A1810] to-[#1A0F0A]">
         <div className="text-center max-w-md bg-[#F5EDD8] rounded-2xl p-8 border-2 border-[#D4A84B]/40 shadow-2xl">
           <div className="w-16 h-16 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <span className="text-3xl">🔐</span>
+            <HiLockClosed className="w-8 h-8 text-[#4A3000]" />
           </div>
           <h1 className="text-2xl font-bold text-[#4A3000] mb-4">
             Please Log In
@@ -153,15 +163,16 @@ export default function MintUSDCPage() {
             onClick={() => router.push('/dashboard')}
             className="text-[#FFB347] hover:text-[#FFE4A0] mb-4 flex items-center gap-2 font-medium"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-            </svg>
+            <HiArrowLeft className="w-5 h-5" />
             Back to Dashboard
           </button>
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Mint USDC Tokens
-          </h1>
-          <p className="text-[#FFE4A0]/80">
+          <h2
+            className="text-[#FFE4A0] text-xl font-bold tracking-wider mb-2"
+            style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+          >
+            MINT USDC
+          </h2>
+          <p className="text-[#FFE4A0]/80 text-sm">
             Get free mock USDC tokens for testing
           </p>
         </div>
@@ -189,7 +200,7 @@ export default function MintUSDCPage() {
           {!canMint && cooldownRemaining > 0 && (
             <div className="bg-[#FFB347]/20 border-2 border-[#FFB347]/50 rounded-xl p-4 mb-4">
               <p className="text-[#4A3000] font-medium flex items-center gap-2">
-                <span>⏳</span> Cooldown Active
+                <HiClock className="w-5 h-5 text-[#8B6914]" /> Cooldown Active
               </p>
               <p className="text-[#6B4F0F] text-sm mt-1">
                 You can mint again in {formatCooldown(cooldownRemaining)}
@@ -210,7 +221,7 @@ export default function MintUSDCPage() {
               max="1000"
               step="0.01"
               disabled={!canMint || isLoading}
-              className="w-full px-4 py-3 bg-white border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+              className="w-full px-4 py-3 bg-[#FBF7EC] border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
               placeholder="Enter amount (max 1000)"
             />
             <p className="text-sm text-[#8B6914]/70 mt-1">
@@ -247,7 +258,7 @@ export default function MintUSDCPage() {
           {error && (
             <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4 mb-4">
               <p className="text-[#8B3030] flex items-center gap-2">
-                <span>⚠️</span> {error}
+                <HiExclamationCircle className="w-5 h-5" /> {error}
               </p>
             </div>
           )}
@@ -256,7 +267,7 @@ export default function MintUSDCPage() {
           {success && (
             <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-4 mb-4">
               <p className="text-[#2D5A2D] flex items-center gap-2">
-                <span>✅</span> {success}
+                <HiCheckCircle className="w-5 h-5" /> {success}
               </p>
             </div>
           )}
@@ -275,7 +286,7 @@ export default function MintUSDCPage() {
             ) : !canMint ? (
               'Cooldown Active'
             ) : (
-              '💰 Mint USDC'
+              <span className="flex items-center justify-center gap-2"><FaCoins className="w-5 h-5" /> Mint USDC</span>
             )}
           </button>
         </div>
@@ -283,7 +294,7 @@ export default function MintUSDCPage() {
         {/* Info Card */}
         <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/50 rounded-2xl p-6">
           <h3 className="font-bold text-[#4A3000] mb-3 flex items-center gap-2">
-            <span>💡</span> Faucet Information
+            <FaFaucet className="w-5 h-5 text-[#8B6914]" /> Faucet Information
           </h3>
           <ul className="space-y-2 text-sm text-[#6B4F0F]">
             <li className="flex items-start gap-2">

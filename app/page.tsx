@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/ui/Header";
 import { Footer } from "@/components/ui/Footer";
@@ -12,11 +12,13 @@ import { useAuthStore } from "@/store/auth.store";
 import { authAPI } from "@/lib/api";
 import { getOrCreateKeypairForUser } from "@/lib/keypair";
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
+import { HiExclamationCircle } from "react-icons/hi";
 
 export default function Home() {
   const router = useRouter();
   const { login, isAuthenticated } = useAuthStore();
   const currentAccount = useCurrentAccount();
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -44,8 +46,9 @@ export default function Home() {
             '' // No token for wallet users
           );
           router.push('/dashboard');
-        } catch (error) {
+        } catch (error: any) {
           console.error('Wallet login error:', error);
+          setLoginError('Failed to connect wallet. Please try again.');
         }
       }, 500);
 
@@ -84,8 +87,9 @@ export default function Home() {
 
         router.push('/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      setLoginError('Login failed. Please check your connection and try again.');
     }
   };
 
@@ -136,13 +140,27 @@ export default function Home() {
                   </p>
                 </div>
 
+                {/* Login Error Message */}
+                {loginError && (
+                  <div className="bg-red-500/20 border border-red-400/50 rounded-xl p-3 flex items-center gap-2 max-w-md">
+                    <HiExclamationCircle className="w-5 h-5 text-red-300 flex-shrink-0" />
+                    <p className="text-red-200 text-sm">{loginError}</p>
+                    <button 
+                      onClick={() => setLoginError(null)}
+                      className="text-red-300 hover:text-white ml-auto text-lg"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+
                 {/* Login buttons */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
+                <div className="flex flex-col sm:flex-row items-center gap-2 justify-center lg:justify-start pt-4">
                   {/* Google Sign In Button */}
                   <div className="w-full max-w-xs">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
-                      onError={() => console.error('Login Failed')}
+                      onError={() => setLoginError('Google sign-in failed. Please try again.')}
                       width="280"
                       text="signin_with"
                       shape="rectangular"
@@ -151,7 +169,7 @@ export default function Home() {
                     />
                   </div>
 
-                  <span className="text-amber-100/70 text-sm font-bold uppercase tracking-wider">OR</span>
+                  <span className="text-amber-100/70 text-sm font-bold uppercase tracking-wider px-2">OR</span>
 
                   {/* Sui Wallet Connect Button */}
                   <div className="sui-wallet-button">
@@ -169,15 +187,15 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-8">
               <FeatureCard
                 title="How It Works ?"
-                description="Lorem Ipsum Is Simply Dummy Text Of The Printing And Typesetting Industry. Lorem Ipsum Has Been The Industry's Standard Dummy Text Ever, When An Unknown Printer Took A Galley Of Type And Scrambled It To Make A Type Specimen Book. It Has Survived Not Only Five Centuries, But Also The Leap Into Electronic Typesetting, Remaining Essentially Unchanged. It Was Popularised In The 1960s With The Release Of Letraset Sheets Recently With Desktop Publishing Software Like Aldus PageMaker Including Versions Of Lorem Ipsum."
+                description="Join a savings room, set your weekly deposit target, and commit to your financial goals. Each week, deposit USDC into the smart contract pool. Stay consistent to remain eligible for rewards. At the end of the challenge, consistent savers share the bonus pool while building healthy financial habits together with the community."
               />
               <FeatureCard
                 title="AI-Assisted"
-                description="Lorem Ipsum Is Simply Dummy Text Of The Printing And Typesetting Industry. Lorem Ipsum Has Been The Industry's Standard Dummy Text Ever, When An Unknown Printer Took A Galley Of Type And Scrambled It To Make A Type Specimen Book. It Has Survived Not Only Five Centuries, But Also The Leap Into Electronic Typesetting, Remaining Essentially Unchanged. It Was Popularised In The 1960s With The Release Of Letraset Sheets Recently With Desktop Publishing Software Like Aldus PageMaker Including Versions Of Lorem Ipsum."
+                description="Our intelligent AI analyzes your financial goals, risk tolerance, and saving patterns to recommend the perfect investment strategy. Get personalized suggestions for Conservative, Balanced, or Aggressive approaches. The AI continuously learns from market trends and your preferences to optimize your savings journey and maximize returns."
               />
               <FeatureCard
                 title="Rewards"
-                description="Lorem Ipsum Is Simply Dummy Text Of The Printing And Typesetting Industry. Lorem Ipsum Has Been The Industry's Standard Dummy Text Ever, When An Unknown Printer Took A Galley Of Type And Scrambled It To Make A Type Specimen Book. It Has Survived Not Only Five Centuries, But Also The Leap Into Electronic Typesetting, Remaining Essentially Unchanged. It Was Popularised In The 1960s With The Release Of Letraset Sheets Recently With Desktop Publishing Software Like Aldus PageMaker Including Versions Of Lorem Ipsum."
+                description="Earn rewards for staying consistent! Players who meet their weekly targets share from the bonus pool funded by those who miss deposits. The longer you stay committed, the bigger your share. Top performers receive additional bonuses, NFT badges, and exclusive access to premium rooms with higher reward multipliers."
               />
             </div>
           </div>
@@ -200,7 +218,7 @@ export default function Home() {
               <div className="w-full max-w-xs">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
-                  onError={() => console.error('Login Failed')}
+                  onError={() => setLoginError('Google sign-in failed. Please try again.')}
                   width="280"
                   text="signin_with"
                   shape="rectangular"
@@ -216,6 +234,20 @@ export default function Home() {
                 <ConnectButton />
               </div>
             </div>
+
+            {/* Login Error Message */}
+            {loginError && (
+              <div className="bg-red-500/20 border border-red-400/50 rounded-xl p-3 flex items-center gap-2 max-w-md mx-auto">
+                <HiExclamationCircle className="w-5 h-5 text-red-300 flex-shrink-0" />
+                <p className="text-red-200 text-sm">{loginError}</p>
+                <button 
+                  onClick={() => setLoginError(null)}
+                  className="text-red-300 hover:text-white ml-auto text-lg"
+                >
+                  ×
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
