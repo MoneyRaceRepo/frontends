@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usdcAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
+import { LottieLoading, LottieSpinner } from '@/components/ui/LottieLoading';
+import { HiArrowLeft, HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiSparkles } from 'react-icons/hi';
+import { FaCoins, FaWallet, FaGift, FaFaucet, FaMagic } from 'react-icons/fa';
+import { RiCoinsFill, RiExchangeDollarFill } from 'react-icons/ri';
 
 export default function MintUSDCPage() {
   const router = useRouter();
@@ -107,28 +111,28 @@ export default function MintUSDCPage() {
   // Check if user is logged in
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#2A1810] to-[#1A0F0A]">
+        <LottieLoading size="xl" text="Loading..." />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#2A1810] to-[#1A0F0A]">
+        <div className="text-center max-w-md bg-[#F5EDD8] rounded-2xl p-8 border-2 border-[#D4A84B]/40 shadow-2xl">
+          <div className="w-16 h-16 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <span className="text-3xl">🔐</span>
+          </div>
+          <h1 className="text-2xl font-bold text-[#4A3000] mb-4">
             Please Log In
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-[#6B4F0F] mb-6">
             You need to be logged in to mint USDC tokens.
           </p>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-8 py-3 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border-2 border-[#D4A84B]"
           >
             Go to Home
           </button>
@@ -141,50 +145,53 @@ export default function MintUSDCPage() {
   const cooldownRemaining = cooldownInfo?.timeUntilNextMint || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#2A1810] to-[#1A0F0A] py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.push('/dashboard')}
-            className="text-blue-600 hover:text-blue-700 mb-4 flex items-center"
+            className="text-[#FFB347] hover:text-[#FFE4A0] mb-4 flex items-center gap-2 font-medium"
           >
-            ← Back to Dashboard
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Back to Dashboard
           </button>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-white mb-2">
             Mint USDC Tokens
           </h1>
-          <p className="text-gray-600">
+          <p className="text-[#FFE4A0]/80">
             Get free mock USDC tokens for testing
           </p>
         </div>
 
         {/* Balance Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-700 mb-2">
+        <div className="bg-[#F5EDD8] rounded-2xl shadow-xl p-6 mb-6 border-2 border-[#D4A84B]/40">
+          <h2 className="text-lg font-semibold text-[#8B6914] mb-2">
             Current Balance
           </h2>
-          <div className="text-4xl font-bold text-blue-600">
-            {balanceFormatted} USDC
+          <div className="text-4xl font-bold text-[#4A3000]">
+            {balanceFormatted} <span className="text-[#8B6914]">USDC</span>
           </div>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-[#8B6914]/70 mt-2">
             Address: {user.address.slice(0, 8)}...{user.address.slice(-6)}
           </p>
         </div>
 
         {/* Mint Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <div className="bg-[#F5EDD8] rounded-2xl shadow-xl p-6 mb-6 border-2 border-[#D4A84B]/40">
+          <h2 className="text-xl font-bold text-[#4A3000] mb-4">
             Mint Tokens
           </h2>
 
           {/* Cooldown Warning */}
           {!canMint && cooldownRemaining > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-yellow-800 font-medium">
-                ⏳ Cooldown Active
+            <div className="bg-[#FFB347]/20 border-2 border-[#FFB347]/50 rounded-xl p-4 mb-4">
+              <p className="text-[#4A3000] font-medium flex items-center gap-2">
+                <span>⏳</span> Cooldown Active
               </p>
-              <p className="text-yellow-700 text-sm mt-1">
+              <p className="text-[#6B4F0F] text-sm mt-1">
                 You can mint again in {formatCooldown(cooldownRemaining)}
               </p>
             </div>
@@ -192,7 +199,7 @@ export default function MintUSDCPage() {
 
           {/* Amount Input */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#4A3000] mb-2">
               Amount (USDC)
             </label>
             <input
@@ -203,10 +210,10 @@ export default function MintUSDCPage() {
               max="1000"
               step="0.01"
               disabled={!canMint || isLoading}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 bg-white border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
               placeholder="Enter amount (max 1000)"
             />
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-[#8B6914]/70 mt-1">
               Maximum: 1000 USDC per mint
             </p>
           </div>
@@ -216,21 +223,21 @@ export default function MintUSDCPage() {
             <button
               onClick={() => setAmount('100')}
               disabled={!canMint || isLoading}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
             >
               100 USDC
             </button>
             <button
               onClick={() => setAmount('500')}
               disabled={!canMint || isLoading}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
             >
               500 USDC
             </button>
             <button
               onClick={() => setAmount('1000')}
               disabled={!canMint || isLoading}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
             >
               1000 USDC
             </button>
@@ -238,15 +245,19 @@ export default function MintUSDCPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-              <p className="text-red-800">{error}</p>
+            <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4 mb-4">
+              <p className="text-[#8B3030] flex items-center gap-2">
+                <span>⚠️</span> {error}
+              </p>
             </div>
           )}
 
           {/* Success Message */}
           {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <p className="text-green-800">{success}</p>
+            <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-4 mb-4">
+              <p className="text-[#2D5A2D] flex items-center gap-2">
+                <span>✅</span> {success}
+              </p>
             </div>
           )}
 
@@ -254,31 +265,43 @@ export default function MintUSDCPage() {
           <button
             onClick={handleMint}
             disabled={!canMint || isLoading}
-            className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold text-lg"
+            className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-bold text-lg border-2 border-[#D4A84B]"
           >
             {isLoading ? (
-              <span className="flex items-center justify-center">
-                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></span>
+              <span className="flex items-center justify-center gap-2">
+                <LottieSpinner size={24} />
                 Minting...
               </span>
             ) : !canMint ? (
               'Cooldown Active'
             ) : (
-              'Mint USDC'
+              '💰 Mint USDC'
             )}
           </button>
         </div>
 
         {/* Info Card */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 className="font-semibold text-blue-900 mb-3">
-            Faucet Information
+        <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/50 rounded-2xl p-6">
+          <h3 className="font-bold text-[#4A3000] mb-3 flex items-center gap-2">
+            <span>💡</span> Faucet Information
           </h3>
-          <ul className="space-y-2 text-sm text-blue-800">
-            <li>• Maximum mint: 1000 USDC per transaction</li>
-            <li>• Cooldown: 24 hours between mints</li>
-            <li>• This is a mock token for testing purposes</li>
-            <li>• Transactions are sponsored (gasless)</li>
+          <ul className="space-y-2 text-sm text-[#6B4F0F]">
+            <li className="flex items-start gap-2">
+              <span>•</span>
+              <span>Maximum mint: 1000 USDC per transaction</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span>•</span>
+              <span>Cooldown: 24 hours between mints</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span>•</span>
+              <span>This is a mock token for testing purposes</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span>•</span>
+              <span>Transactions are sponsored (gasless)</span>
+            </li>
           </ul>
         </div>
       </div>

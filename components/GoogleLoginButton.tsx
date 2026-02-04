@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { getOrCreateKeypairForUser } from '@/lib/keypair';
+import { LottieLoading } from '@/components/ui/LottieLoading';
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
@@ -100,9 +101,8 @@ export function GoogleLoginButton({ onSuccess, onError }: GoogleLoginButtonProps
   if (loading) {
     return (
       <div className="w-full">
-        <div className="flex items-center justify-center gap-2 py-3 px-6 bg-gray-100 rounded-lg">
-          <span className="animate-spin">⏳</span>
-          <span>Signing in...</span>
+        <div className="flex items-center justify-center gap-2 py-3 px-6 bg-[#F0E6D0] rounded-lg">
+          <LottieLoading size="sm" text="Signing in..." />
         </div>
       </div>
     );

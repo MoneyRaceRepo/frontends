@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import DashboardLayout from "@/components/DashboardLayout";
+import { LottieSpinner } from "@/components/ui/LottieLoading";
+import { HiKey, HiIdentification, HiSearch, HiArrowRight, HiLightBulb, HiExclamationCircle } from "react-icons/hi";
+import { FaKey, FaDoorOpen, FaHashtag } from "react-icons/fa";
+import { RiDoorOpenFill, RiLockPasswordFill } from "react-icons/ri";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -15,6 +17,7 @@ export default function JoinPrivateRoom() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeMethod, setActiveMethod] = useState<"password" | "roomId">("password");
 
   const handleJoinByRoomId = () => {
     if (!roomId || roomId.trim() === "") {
@@ -65,117 +68,213 @@ export default function JoinPrivateRoom() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold">
-            Money<span className="text-blue-600">Race</span>
-          </h1>
+    <DashboardLayout>
+      <div className="max-w-2xl mx-auto">
+        {/* Header with Mascot */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1
+              className="text-[#4A3000] text-2xl font-bold tracking-wider mb-2"
+              style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+            >
+              JOIN ROOM
+            </h1>
+            <p className="text-[#6B4F0F]">Enter the Room ID or Password to join a private room</p>
+          </div>
+          <div className="animate-float">
+            <Image
+              src="/mascotsemut.png"
+              alt="Ant Mascot"
+              width={80}
+              height={80}
+              className="drop-shadow-lg"
+            />
+            <style jsx>{`
+              @keyframes float {
+                0%, 100% {
+                  transform: translateY(0) rotate(-5deg);
+                }
+                50% {
+                  transform: translateY(-10px) rotate(5deg);
+                }
+              }
+              .animate-float {
+                animation: float 3s ease-in-out infinite;
+              }
+            `}</style>
+          </div>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle>🔒 Join Private Room</CardTitle>
-            <CardDescription>
-              Enter the Room ID or Password to join a private room
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded p-3">
-                <p className="text-red-800 text-sm">{error}</p>
+        {/* Main Card */}
+        <div className="bg-gradient-to-br from-[#8B6914]/20 to-[#8B6914]/10 rounded-2xl p-8 border-3 border-[#8B6914]/40 shadow-xl">
+          {/* Tab Buttons */}
+          <div className="flex gap-3 mb-8">
+            <button
+              onClick={() => {
+                setActiveMethod("password");
+                setError("");
+              }}
+              className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all duration-300 border-2 ${
+                activeMethod === "password"
+                  ? "bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] border-[#D4A84B] shadow-xl scale-105"
+                  : "bg-[#8B6914]/20 text-[#6B4F0F] border-[#8B6914]/40 hover:bg-[#8B6914]/30 hover:scale-102"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-2xl">🔑</span>
+                <div className="text-left">
+                  <p className={`text-sm font-semibold ${activeMethod === "password" ? "text-[#4A3000]" : "text-[#6B4F0F]"}`}>
+                    Option 1
+                  </p>
+                  <p className={`text-xs ${activeMethod === "password" ? "text-[#4A3000]/80" : "text-[#6B4F0F]/70"}`}>
+                    Use Password
+                  </p>
+                </div>
               </div>
-            )}
+            </button>
 
-            {/* Method 1: Join by Password */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="h-px flex-1 bg-gray-200"></div>
-                <span className="text-xs text-gray-500 font-medium">OPTION 1: USE PASSWORD</span>
-                <div className="h-px flex-1 bg-gray-200"></div>
+            <button
+              onClick={() => {
+                setActiveMethod("roomId");
+                setError("");
+              }}
+              className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all duration-300 border-2 ${
+                activeMethod === "roomId"
+                  ? "bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] border-[#D4A84B] shadow-xl scale-105"
+                  : "bg-[#8B6914]/20 text-[#6B4F0F] border-[#8B6914]/40 hover:bg-[#8B6914]/30 hover:scale-102"
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-2xl">🆔</span>
+                <div className="text-left">
+                  <p className={`text-sm font-semibold ${activeMethod === "roomId" ? "text-[#4A3000]" : "text-[#6B4F0F]"}`}>
+                    Option 2
+                  </p>
+                  <p className={`text-xs ${activeMethod === "roomId" ? "text-[#4A3000]/80" : "text-[#6B4F0F]/70"}`}>
+                    Use Room ID
+                  </p>
+                </div>
               </div>
+            </button>
+          </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="text"
-                  placeholder="Enter 8-character password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setError("");
-                  }}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Enter the password shared by the room creator
-                </p>
-              </div>
-
-              <Button
-                onClick={handleJoinByPassword}
-                className="w-full"
-                disabled={loading}
-              >
-                {loading ? "Searching..." : "🔍 Find Room by Password"}
-              </Button>
+          {error && (
+            <div className="bg-red-100 border-2 border-red-300 rounded-xl p-4 mb-6 flex items-start gap-3">
+              <span className="text-2xl">❌</span>
+              <p className="text-red-800 text-sm font-medium flex-1">{error}</p>
             </div>
+          )}
 
-            {/* Divider */}
-            <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-gray-200"></div>
-              <span className="text-xs text-gray-500 font-medium">OR</span>
-              <div className="h-px flex-1 bg-gray-200"></div>
-            </div>
+          {/* Method 1: Join by Password */}
+          {activeMethod === "password" && (
+            <div className="space-y-6">
+              <style jsx>{`
+                @keyframes fadeIn {
+                  from { opacity: 0; transform: translateY(10px); }
+                  to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn {
+                  animation: fadeIn 0.3s ease-out;
+                }
+              `}</style>
 
-            {/* Method 2: Join by Room ID */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="h-px flex-1 bg-gray-200"></div>
-                <span className="text-xs text-gray-500 font-medium">OPTION 2: USE ROOM ID</span>
-                <div className="h-px flex-1 bg-gray-200"></div>
-              </div>
-
-              <div>
-                <Label htmlFor="roomId">Room ID</Label>
-                <Input
-                  id="roomId"
-                  placeholder="0x..."
-                  value={roomId}
-                  onChange={(e) => {
-                    setRoomId(e.target.value);
-                    setError("");
-                  }}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Paste the full Room ID (starts with 0x)
-                </p>
-              </div>
-
-              <Button onClick={handleJoinByRoomId} className="w-full">
-                Continue to Room
-              </Button>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded p-3">
-              <p className="text-xs text-blue-800">
-                💡 The room creator should have shared either the password or the Room ID with you. You only need one of them to join.
+            <div className="bg-[#E8D5A8]/50 rounded-xl p-6 border-2 border-[#D4A84B]/40 animate-fadeIn">
+              <label htmlFor="password" className="flex items-center gap-2 text-[#4A3000] font-semibold mb-3">
+                <span className="text-xl">🔐</span>
+                Room Password
+              </label>
+              <input
+                id="password"
+                type="text"
+                placeholder="Enter 8-character password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError("");
+                }}
+                className="w-full px-5 py-4 bg-white border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all font-mono text-lg tracking-widest"
+              />
+              <p className="text-xs text-[#6B4F0F] mt-2 flex items-center gap-1">
+                <span>💡</span>
+                Enter the password shared by the room creator
               </p>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => router.push("/dashboard")}
-              className="w-full"
+            <button
+              onClick={handleJoinByPassword}
+              disabled={loading}
+              className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-[#D4A84B]"
             >
-              ← Back to Dashboard
-            </Button>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LottieSpinner size={24} />
+                  Searching...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <span>🔍</span>
+                  Find Room by Password
+                </span>
+              )}
+            </button>
+          </div>
+          )}
+
+          {/* Method 2: Join by Room ID */}
+          {activeMethod === "roomId" && (
+            <div className="space-y-6">
+              <style jsx>{`
+                @keyframes fadeIn {
+                  from { opacity: 0; transform: translateY(10px); }
+                  to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn {
+                  animation: fadeIn 0.3s ease-out;
+                }
+              `}</style>
+
+            <div className="bg-[#E8D5A8]/50 rounded-xl p-6 border-2 border-[#D4A84B]/40 animate-fadeIn">
+              <label htmlFor="roomId" className="flex items-center gap-2 text-[#4A3000] font-semibold mb-3">
+                <span className="text-xl">🏷️</span>
+                Room ID
+              </label>
+              <input
+                id="roomId"
+                placeholder="0x..."
+                value={roomId}
+                onChange={(e) => {
+                  setRoomId(e.target.value);
+                  setError("");
+                }}
+                className="w-full px-5 py-4 bg-white border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all font-mono text-sm"
+              />
+              <p className="text-xs text-[#6B4F0F] mt-2 flex items-center gap-1">
+                <span>💡</span>
+                Paste the full Room ID (starts with 0x)
+              </p>
+            </div>
+
+            <button
+              onClick={handleJoinByRoomId}
+              className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 border-2 border-[#D4A84B]"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <span>🚪</span>
+                Continue to Room
+              </span>
+            </button>
+          </div>
+          )}
+
+          {/* Back Button */}
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="w-full px-6 py-3.5 bg-[#8B6914]/30 text-[#4A3000] font-bold rounded-xl border-2 border-[#8B6914]/50 hover:bg-[#8B6914]/40 transition-all duration-200 mt-6"
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

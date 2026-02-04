@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
+import DashboardLayout from "@/components/DashboardLayout";
 import { roomAPI, usdcAPI, playerAPI, executeSponsoredTransaction, getSponsorAddress } from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 import { getCoinsForAmount } from "@/lib/sui-utils";
 import { DEFAULT_COIN_TYPE, MIN_BALANCE_USDC, SUI_CLOCK_ID } from "@/lib/constants";
 import { buildJoinRoomTx, buildDepositTx, buildClaimTx } from "@/lib/tx-builder";
 import { buildSponsoredTx } from "@/lib/zklogin-tx";
+import { LottieLoading, LottieSpinner } from "@/components/ui/LottieLoading";
 
 // Helper function to format time ago
 function getTimeAgo(date: Date): string {
@@ -679,161 +678,178 @@ export default function RoomDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">
-            Money<span className="text-blue-600">Race</span>
-          </h1>
-          <div className="flex items-center gap-4">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto">
+        {/* Header with Mascot */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-4 mb-2">
+              <h1
+                className="text-[#4A3000] text-3xl font-bold tracking-wider"
+                style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+              >
+                {room.name}
+              </h1>
+              {room.isPrivate && (
+                <span className="text-sm px-3 py-1.5 rounded-full bg-[#F0E6D0] text-[#6B4F0F] font-bold border-2 border-[#C9A86C]">
+                  🔒 Private
+                </span>
+              )}
+              <span
+                className={`text-xs px-3 py-1.5 rounded-full font-bold border-2 ${
+                  room.currentPeriod >= room.totalPeriods
+                    ? "bg-[#E8F4E8] text-[#2D5A2D] border-[#9BC49B]"
+                    : room.status === "active"
+                    ? "bg-[#E8F4E8] text-[#2D5A2D] border-[#9BC49B]"
+                    : room.status === "pending"
+                    ? "bg-[#FFF8E6] text-[#8B6914] border-[#D4A84B]"
+                    : "bg-[#F0F0F0] text-[#606060] border-[#A0A0A0]"
+                }`}
+              >
+                {room.currentPeriod >= room.totalPeriods
+                  ? "✓ Completed"
+                  : room.status === "active"
+                  ? "⚡ Active"
+                  : room.status === "pending"
+                  ? "⏳ Pending"
+                  : "🏁 Finished"}
+              </span>
+            </div>
+            <p className="text-[#6B4F0F] flex items-center gap-2">
+              <span className="font-semibold">{room.strategy} Strategy</span>
+              <span>•</span>
+              <span className="font-mono text-sm">{room.creator?.slice(0, 8)}...{room.creator?.slice(-6)}</span>
+            </p>
             {user?.address && (
-              <div className="text-right">
-                <div className="text-sm font-semibold text-green-600">
-                  💰 {usdcBalance} USDC
+              <div className="mt-3 flex items-center gap-4">
+                <div className="bg-gradient-to-r from-[#FFB347]/20 to-[#E89530]/20 px-4 py-2 rounded-xl border-2 border-[#D4A84B]/40">
+                  <span className="text-sm font-bold text-[#4A3000]">
+                    💰 {usdcBalance} USDC
+                  </span>
                 </div>
                 <button
                   onClick={() => router.push("/mint")}
-                  className="text-xs text-blue-600 hover:text-blue-700 underline"
+                  className="text-xs text-[#8B6914] hover:text-[#6B4F0F] underline font-semibold"
                 >
-                  Get more USDC
+                  Get more USDC →
                 </button>
               </div>
             )}
-            <Button variant="outline" onClick={() => router.push("/dashboard")}>
-              ← Back to Dashboard
-            </Button>
+          </div>
+          <div className="animate-float">
+            <Image
+              src="/mascotsemut.png"
+              alt="Ant Mascot"
+              width={100}
+              height={100}
+              className="drop-shadow-lg"
+            />
+            <style jsx>{`
+              @keyframes float {
+                0%, 100% {
+                  transform: translateY(0) rotate(-5deg);
+                }
+                50% {
+                  transform: translateY(-10px) rotate(5deg);
+                }
+              }
+              .animate-float {
+                animation: float 3s ease-in-out infinite;
+              }
+            `}</style>
           </div>
         </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
         {/* Error Alert - Show at top if there's an API error */}
         {error && !roomData && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h3 className="font-semibold text-yellow-800 mb-2">⚠️ Unable to Load Room Data</h3>
-            <p className="text-yellow-700 text-sm mb-2">{error}</p>
-            <p className="text-xs text-yellow-600">
-              Room ID: <code className="bg-yellow-100 px-2 py-1 rounded">{roomId}</code>
-            </p>
-            <p className="text-xs text-yellow-600 mt-2">
-              💡 Tip: Make sure the room has been created on the blockchain first. Using mock data for now.
-            </p>
+          <div className="mb-6 bg-gradient-to-r from-yellow-100 to-orange-100 border-3 border-yellow-400 rounded-2xl p-6 shadow-lg">
+            <h3 className="font-bold text-yellow-900 mb-2 text-lg flex items-center gap-2">
+              <span className="text-2xl">⚠️</span>
+              Unable to Load Room Data
+            </h3>
+            <p className="text-yellow-800 text-sm mb-3">{error}</p>
+            <div className="bg-yellow-50 rounded-xl p-3 border-2 border-yellow-300">
+              <p className="text-xs text-yellow-700 mb-1">
+                Room ID: <code className="bg-yellow-200 px-2 py-1 rounded font-mono">{roomId}</code>
+              </p>
+              <p className="text-xs text-yellow-700 flex items-start gap-2 mt-2">
+                <span>💡</span>
+                <span>Tip: Make sure the room has been created on the blockchain first. Using mock data for now.</span>
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Room Header */}
-        <div className="mb-6">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-3xl font-bold">{room.name}</h2>
-                {room.isPrivate && (
-                  <span className="text-sm px-2 py-1 rounded bg-purple-100 text-purple-800">
-                    🔒 Private
-                  </span>
-                )}
-              </div>
-              <p className="text-gray-600">
-                {room.strategy} Strategy • Created by {room.creator}
-              </p>
-            </div>
-            <span
-              className={`text-xs px-3 py-1 rounded ${room.currentPeriod >= room.totalPeriods
-                ? "bg-purple-100 text-purple-800"
-                : room.status === "active"
-                  ? "bg-green-100 text-green-800"
-                  : room.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-            >
-              {room.currentPeriod >= room.totalPeriods
-                ? "✓ Completed"
-                : room.status === "active"
-                  ? "Active"
-                  : room.status === "pending"
-                    ? "Pending"
-                    : "Finished"}
-            </span>
-          </div>
-        </div>
-
         {/* Test Mode Banner */}
         {periodInfo?.isTestMode && (
-          <div className="mb-4 bg-orange-50 border border-orange-200 rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <span className="text-orange-600 font-bold">🧪 TEST MODE</span>
-              <span className="text-sm text-orange-700">
-                Each period is 1 minute (instead of 1 week)
-              </span>
+          <div className="mb-6 bg-gradient-to-r from-orange-100 to-red-100 border-3 border-orange-400 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🧪</span>
+              <div>
+                <span className="text-orange-900 font-bold text-lg">TEST MODE</span>
+                <p className="text-sm text-orange-800 mt-1">
+                  Each period is 1 minute (instead of 1 week) for testing purposes
+                </p>
+              </div>
             </div>
           </div>
         )}
 
         {/* Stats Grid */}
         <div className="grid md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Progress</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {room.currentPeriod >= room.totalPeriods ? (
-                  <span className="text-green-600">✓ Completed</span>
-                ) : (
-                  <>{periodInfo?.isTestMode ? 'Period' : 'Week'} {room.currentPeriod}/{room.totalPeriods}</>
-                )}
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div
-                  className={`h-2 rounded-full ${room.currentPeriod >= room.totalPeriods ? 'bg-green-600' : 'bg-blue-600'}`}
-                  style={{ width: `${Math.min(100, (room.currentPeriod / room.totalPeriods) * 100)}%` }}
-                />
-              </div>
-              {/* Countdown to next period - only show if not completed */}
-              {periodInfo && room.currentPeriod < room.totalPeriods && (
-                <div className="mt-2 text-xs text-gray-600">
-                  Next {periodInfo.isTestMode ? 'period' : 'week'} in:{' '}
-                  <span className={`font-bold ${periodInfo.timeUntilNextPeriod <= 10 ? 'text-green-600' : ''}`}>
-                    {formatCountdown(periodInfo.timeUntilNextPeriod)}
-                  </span>
-                </div>
+          {/* Progress Card */}
+          <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-lg hover:shadow-xl transition-all">
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">📊 Progress</div>
+            <div className="text-2xl font-bold text-[#4A3000] mb-3">
+              {room.currentPeriod >= room.totalPeriods ? (
+                <span className="text-green-700">✓ Completed</span>
+              ) : (
+                <>{periodInfo?.isTestMode ? 'Period' : 'Week'} {room.currentPeriod}/{room.totalPeriods}</>
               )}
-              {/* Completed message */}
-              {room.currentPeriod >= room.totalPeriods && (
-                <div className="mt-2 text-xs text-green-600 font-medium">
-                  All {room.totalPeriods} periods completed!
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total Pool</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                ${participants.reduce((sum, p) => sum + p.totalDeposit, 0).toFixed(2)}
+            </div>
+            <div className="w-full bg-[#8B6914]/20 rounded-full h-3 overflow-hidden border border-[#8B6914]/30">
+              <div
+                className={`h-3 rounded-full transition-all ${
+                  room.currentPeriod >= room.totalPeriods
+                    ? 'bg-gradient-to-r from-green-500 to-green-600'
+                    : 'bg-gradient-to-r from-[#FFB347] to-[#E89530]'
+                }`}
+                style={{ width: `${Math.min(100, (room.currentPeriod / room.totalPeriods) * 100)}%` }}
+              />
+            </div>
+            {periodInfo && room.currentPeriod < room.totalPeriods && (
+              <div className="mt-3 text-xs text-[#6B4F0F]">
+                Next {periodInfo.isTestMode ? 'period' : 'week'} in:{' '}
+                <span className={`font-bold ${periodInfo.timeUntilNextPeriod <= 10 ? 'text-green-600 animate-pulse' : 'text-[#4A3000]'}`}>
+                  {formatCountdown(periodInfo.timeUntilNextPeriod)}
+                </span>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Reward Pool</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">${room.rewardPool}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Participants</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{participants.length}</div>
-            </CardContent>
-          </Card>
+            )}
+            {room.currentPeriod >= room.totalPeriods && (
+              <div className="mt-3 text-xs text-green-700 font-bold">
+                🎉 All {room.totalPeriods} periods completed!
+              </div>
+            )}
+          </div>
+
+          {/* Total Pool Card */}
+          <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#8B6914]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-lg hover:shadow-xl transition-all">
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">💎 Total Pool</div>
+            <div className="text-2xl font-bold text-[#4A3000]">
+              ${participants.reduce((sum, p) => sum + p.totalDeposit, 0).toFixed(2)}
+            </div>
+          </div>
+
+          {/* Reward Pool Card */}
+          <div className="bg-gradient-to-br from-[#E8DCC0] to-[#D4C4A0] rounded-2xl p-6 border-3 border-[#C9A86C]/60 shadow-lg hover:shadow-xl transition-all">
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">🏆 Reward Pool</div>
+            <div className="text-2xl font-bold text-[#4A3000]">${room.rewardPool}</div>
+          </div>
+
+          {/* Participants Card */}
+          <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E0D4B8] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-lg hover:shadow-xl transition-all">
+            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide">👥 Participants</div>
+            <div className="text-2xl font-bold text-[#4A3000]">{participants.length}</div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -841,8 +857,11 @@ export default function RoomDetail() {
           {/* Left: Deposit & Actions */}
           <div className="md:col-span-1 space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded p-3">
-                <p className="text-red-800 text-sm">{error}</p>
+              <div className="bg-[#FDF2F2] border-3 border-[#E5A0A0] rounded-xl p-4 shadow-lg">
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">❌</span>
+                  <p className="text-[#8B3030] text-sm font-medium flex-1">{error}</p>
+                </div>
               </div>
             )}
 
@@ -854,36 +873,46 @@ export default function RoomDetail() {
               const roomAlreadyStarted = room.currentPeriod > 0;
 
               return (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Join This Room</CardTitle>
-                    <CardDescription>
+                <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+                  <div className="mb-4">
+                    <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
+                      <span className="text-2xl">🚪</span>
+                      Join This Room
+                    </h3>
+                    <p className="text-sm text-[#6B4F0F] mt-1">
                       {room.isPrivate ? "🔒 Private Room - Password Required" : "Join to start saving and compete with others"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    </p>
+                  </div>
+                  <div className="space-y-4">
                     {/* Room Already Started Warning */}
                     {roomAlreadyStarted ? (
-                      <div className="bg-orange-50 border border-orange-200 rounded p-3">
-                        <p className="text-sm text-orange-800 font-semibold">⏰ Room Already Started</p>
-                        <p className="text-xs text-orange-600 mt-1">
+                      <div className="bg-gradient-to-r from-orange-100 to-red-100 border-2 border-orange-400 rounded-xl p-4">
+                        <p className="text-sm text-orange-900 font-bold flex items-center gap-2">
+                          <span>⏰</span>
+                          Room Already Started
+                        </p>
+                        <p className="text-xs text-orange-700 mt-2">
                           This room is currently in Period {room.currentPeriod}. You can only join rooms during Period 0.
                         </p>
                       </div>
                     ) : (
-                      <div className="bg-blue-50 border border-blue-200 rounded p-3">
-                        <p className="text-sm text-blue-800">
-                          💡 Joining requires an initial deposit of <strong>${requiredAmount}</strong>.
+                      <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/60 rounded-xl p-4">
+                        <p className="text-sm text-[#4A3000] font-semibold flex items-center gap-2">
+                          <span>💡</span>
+                          Joining requires an initial deposit of <strong>${requiredAmount}</strong>
                         </p>
                       </div>
                     )}
 
                     {/* Balance Check Warning - only show if room hasn't started */}
                     {!roomAlreadyStarted && !hasEnoughBalance && (
-                      <div className="bg-red-50 border border-red-200 rounded p-3">
-                        <p className="text-sm text-red-800 font-semibold">⚠️ Insufficient Balance</p>
-                        <p className="text-xs text-red-600 mt-1">
-                          You need at least <strong>${requiredAmount}</strong> USDC but only have <strong>${usdcBalance}</strong>.
+                      <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4">
+                        <p className="text-sm text-[#8B3030] font-bold flex items-center gap-2">
+                          <span>⚠️</span>
+                          Insufficient Balance
+                        </p>
+                        <p className="text-xs text-[#A04040] mt-2">
+                          You need at least <strong>${requiredAmount}</strong> USDC but only have <strong>${usdcBalance}</strong>
                         </p>
                       </div>
                     )}
@@ -891,152 +920,188 @@ export default function RoomDetail() {
                     {/* Password input for private rooms - only show if room hasn't started */}
                     {!roomAlreadyStarted && room.isPrivate && (
                       <div>
-                        <label className="text-sm font-medium">Room Password</label>
-                        <Input
+                        <label className="text-sm font-semibold text-[#4A3000] mb-2 block">🔑 Room Password</label>
+                        <input
                           type="password"
                           placeholder="Enter room password"
                           value={roomPassword}
                           onChange={(e) => setRoomPassword(e.target.value)}
                           disabled={loading}
+                          className="w-full px-4 py-3 bg-white border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
                         />
                       </div>
                     )}
 
-                    <Button
-                      className="w-full"
+                    <button
                       onClick={handleJoinRoom}
                       disabled={loading || roomAlreadyStarted || !hasEnoughBalance || (room.isPrivate && !roomPassword)}
+                      className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-[#D4A84B]"
                     >
                       {roomAlreadyStarted
                         ? "🚫 Room Already Started"
                         : loading
-                          ? "Joining..."
+                          ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <LottieSpinner size={24} />
+                              Joining...
+                            </span>
+                          )
                           : `🚀 Join Room + Deposit $${requiredAmount}`
                       }
-                    </Button>
-                    <p className="text-xs text-gray-500">
-                      ⚠️ Gasless transaction powered by zkLogin
-                    </p>
-                    <p className="text-xs text-green-600">
-                      Your balance: <strong>${usdcBalance}</strong> USDC
-                    </p>
-                  </CardContent>
-                </Card>
+                    </button>
+                    <div className="space-y-1">
+                      <p className="text-xs text-[#6B4F0F] flex items-center gap-1">
+                        <span>⚡</span>
+                        <span>Gasless transaction powered by zkLogin</span>
+                      </p>
+                      <p className="text-xs text-green-700 font-semibold flex items-center gap-1">
+                        <span>💰</span>
+                        <span>Your balance: <strong>${usdcBalance} USDC</strong></span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               );
             })()}
 
             {/* Room Completed Card - Show when all periods are done (active or finished status) */}
             {isJoined && room.currentPeriod >= room.totalPeriods && (room.status === "active" || room.status === "finished") && (
-              <Card className="border-green-300 bg-green-50">
-                <CardHeader>
-                  <CardTitle className="text-green-800">🎉 Room Completed!</CardTitle>
-                  <CardDescription>All {room.totalPeriods} periods have been completed</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="bg-gradient-to-br from-[#E8F4E8] to-[#D8E8D8] rounded-2xl p-6 border-3 border-[#9BC49B] shadow-xl">
+                <div className="mb-4">
+                  <h3 className="text-[#2D5A2D] font-bold text-lg flex items-center gap-2">
+                    <span className="text-2xl">🎉</span>
+                    Room Completed!
+                  </h3>
+                  <p className="text-sm text-[#3D6A3D] mt-1">All {room.totalPeriods} periods have been completed</p>
+                </div>
+                <div className="space-y-4">
                   {hasClaimed ? (
-                    <div className="bg-green-100 border border-green-300 rounded p-4 text-center">
-                      <p className="text-green-800 font-semibold">✅ Rewards Claimed!</p>
-                      <p className="text-sm text-green-600 mt-1">
+                    <div className="bg-[#F0F8F0] border-2 border-[#9BC49B] rounded-xl p-5 text-center">
+                      <p className="text-[#2D5A2D] font-bold text-lg flex items-center justify-center gap-2">
+                        <span className="text-2xl">✅</span>
+                        Rewards Claimed!
+                      </p>
+                      <p className="text-sm text-[#3D6A3D] mt-2">
                         You have successfully claimed your principal and rewards.
                       </p>
                     </div>
                   ) : room.status === "finished" ? (
                     // Room is finalized, show claim button only
                     <>
-                      <div className="bg-white border border-green-200 rounded p-3">
-                        <p className="text-sm text-green-800 mb-2">
+                      <div className="bg-[#F8F4EC] border-2 border-[#C9A86C]/50 rounded-xl p-4">
+                        <p className="text-sm text-[#4A3000] mb-2 font-semibold">
                           <strong>Congratulations!</strong> You have completed this saving room.
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-[#6B4F0F]">
                           ✅ Room has been finalized. You can now claim your rewards!
                         </p>
                       </div>
 
-                      <Button
-                        className="w-full"
+                      <button
                         onClick={handleClaimReward}
                         disabled={loading}
+                        className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-[#D4A84B]"
                       >
-                        {loading ? "Processing..." : "💰 Claim Rewards"}
-                      </Button>
+                        {loading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <LottieSpinner size={24} />
+                            Processing...
+                          </span>
+                        ) : "💰 Claim Rewards"}
+                      </button>
                     </>
                   ) : !showFinalizeButton ? (
                     // Waiting for 3 second delay before showing finalize button
-                    <div className="bg-blue-50 border border-blue-200 rounded p-4 text-center">
-                      <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mb-2"></div>
-                      <p className="text-blue-800 font-semibold">Please wait...</p>
-                      <p className="text-sm text-blue-600 mt-1">
+                    <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/60 rounded-xl p-5 text-center">
+                      <LottieLoading size="sm" />
+                      <p className="text-[#4A3000] font-bold mt-2">Please wait...</p>
+                      <p className="text-sm text-[#6B4F0F] mt-2">
                         Preparing finalize option...
                       </p>
                     </div>
                   ) : (
                     // Room not finalized yet, show manual finalize button
                     <>
-                      <div className="bg-white border border-green-200 rounded p-3">
-                        <p className="text-sm text-green-800 mb-2">
+                      <div className="bg-[#F8F4EC] border-2 border-[#C9A86C]/50 rounded-xl p-4">
+                        <p className="text-sm text-[#4A3000] mb-2 font-semibold">
                           <strong>Congratulations!</strong> You have completed this saving room.
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-[#6B4F0F]">
                           Click the button below to finalize and claim your rewards.
                         </p>
                       </div>
 
                       {error && (
-                        <div className="bg-red-50 border border-red-200 rounded p-3">
-                          <p className="text-xs text-red-800">
-                            ⚠️ {error}
+                        <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-3">
+                          <p className="text-xs text-[#8B3030] font-semibold flex items-center gap-2">
+                            <span>⚠️</span>
+                            {error}
                           </p>
                         </div>
                       )}
 
-                      <Button
-                        className="w-full bg-green-600 hover:bg-green-700"
+                      <button
                         onClick={handleFinalizeRoom}
                         disabled={loading}
+                        className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-[#D4A84B]"
                       >
-                        {loading ? "Finalizing..." : "🔧 Finalize Room"}
-                      </Button>
+                        {loading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <LottieSpinner size={24} />
+                            Finalizing...
+                          </span>
+                        ) : "🔧 Finalize Room"}
+                      </button>
 
-                      <p className="text-xs text-gray-500 text-center">
+                      <p className="text-xs text-green-700 text-center font-medium">
                         After finalizing, the claim button will appear
                       </p>
                     </>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* Deposit Card - Show only if joined AND periods not completed */}
             {room.status === "active" && isJoined && room.currentPeriod < room.totalPeriods && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Make Deposit</CardTitle>
-                  <CardDescription>
-                    {periodInfo?.isTestMode ? 'Period' : 'Weekly'} target: ${room.weeklyTarget}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="bg-green-50 border border-green-200 rounded p-2 mb-2">
-                    <p className="text-xs text-green-800">
-                      ✓ You have joined this room
+              <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+                <div className="mb-4">
+                  <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
+                    <span className="text-2xl">💰</span>
+                    Make Deposit
+                  </h3>
+                  <p className="text-sm text-[#6B4F0F] mt-1">
+                    {periodInfo?.isTestMode ? 'Period' : 'Weekly'} target: <strong>${room.weeklyTarget}</strong>
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-3">
+                    <p className="text-xs text-[#2D5A2D] font-semibold flex items-center gap-2">
+                      <span>✓</span>
+                      You have joined this room
                     </p>
                   </div>
 
                   {/* Period Info */}
                   {periodInfo && (
-                    <div className={`border rounded p-3 ${periodInfo.isTestMode ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200'}`}>
-                      <div className="text-sm font-medium mb-1">
+                    <div className={`border-2 rounded-xl p-4 ${
+                      periodInfo.isTestMode
+                        ? 'bg-[#FFF4E6] border-[#D4A84B]/60'
+                        : 'bg-[#F0E6D0] border-[#C9A86C]/60'
+                    }`}>
+                      <div className="text-sm font-bold mb-2 text-[#4A3000]">
                         Current {periodInfo.isTestMode ? 'Period' : 'Week'}: {periodInfo.currentPeriod}
                       </div>
-                      <div className="text-xs text-gray-600">
+                      <div className="text-xs text-[#6B4F0F]">
                         Next {periodInfo.isTestMode ? 'period' : 'week'} in:{' '}
-                        <span className={`font-bold ${periodInfo.timeUntilNextPeriod <= 10 ? 'text-green-600 animate-pulse' : ''}`}>
+                        <span className={`font-bold ${periodInfo.timeUntilNextPeriod <= 10 ? 'text-[#2D5A2D] animate-pulse' : 'text-[#4A3000]'}`}>
                           {formatCountdown(periodInfo.timeUntilNextPeriod)}
                         </span>
                       </div>
                       {periodInfo.isTestMode && (
-                        <div className="text-xs text-orange-600 mt-1">
-                          🧪 Test mode: 1 min periods
+                        <div className="text-xs text-[#8B6914] mt-2 font-semibold flex items-center gap-1">
+                          <span>🧪</span>
+                          Test mode: 1 min periods
                         </div>
                       )}
                     </div>
@@ -1044,12 +1109,15 @@ export default function RoomDetail() {
 
                   {/* Already Deposited Message */}
                   {hasDepositedThisPeriod ? (
-                    <div className="bg-green-100 border border-green-300 rounded p-4 text-center">
-                      <p className="text-green-800 font-semibold">✅ Deposit Complete!</p>
-                      <p className="text-sm text-green-600 mt-1">
-                        You have already deposited for {periodInfo?.isTestMode ? 'Period' : 'Week'} {periodInfo?.currentPeriod || 0}.
+                    <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-5 text-center">
+                      <p className="text-[#2D5A2D] font-bold text-lg flex items-center justify-center gap-2">
+                        <span className="text-2xl">✅</span>
+                        Deposit Complete!
                       </p>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-sm text-[#3D6A3D] mt-2">
+                        You have already deposited for {periodInfo?.isTestMode ? 'Period' : 'Week'} {periodInfo?.currentPeriod || 0}
+                      </p>
+                      <p className="text-xs text-[#4D7A4D] mt-3 font-semibold">
                         Next deposit available in: <span className="font-bold">{formatCountdown(periodInfo?.timeUntilNextPeriod || 0)}</span>
                       </p>
                     </div>
@@ -1060,242 +1128,301 @@ export default function RoomDetail() {
 
                     return (
                       <>
-                        <div className="bg-blue-50 border border-blue-200 rounded p-3 text-center">
-                          <p className="text-sm text-blue-800">
+                        <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/60 rounded-xl p-4 text-center">
+                          <p className="text-sm text-[#4A3000] font-semibold">
                             Deposit amount: <span className="font-bold">${requiredAmount}</span>
                           </p>
-                          <p className="text-xs text-gray-600 mt-1">
-                            Your balance: <span className="font-semibold">${usdcBalance}</span> USDC
+                          <p className="text-xs text-[#6B4F0F] mt-2">
+                            Your balance: <span className="font-bold">${usdcBalance} USDC</span>
                           </p>
                         </div>
 
-                        {/* Balance Check Warning */}
                         {!hasEnoughBalance && (
-                          <div className="bg-red-50 border border-red-200 rounded p-3">
-                            <p className="text-sm text-red-800 font-semibold">⚠️ Insufficient Balance</p>
-                            <p className="text-xs text-red-600 mt-1">
-                              You need <strong>${requiredAmount}</strong> USDC but only have <strong>${usdcBalance}</strong>.
+                          <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4">
+                            <p className="text-sm text-[#8B3030] font-bold flex items-center gap-2">
+                              <span>⚠️</span>
+                              Insufficient Balance
+                            </p>
+                            <p className="text-xs text-[#A04040] mt-2">
+                              You need <strong>${requiredAmount}</strong> USDC but only have <strong>${usdcBalance}</strong>
                             </p>
                           </div>
                         )}
 
-                        <Button
-                          className="w-full"
+                        <button
                           onClick={handleDeposit}
                           disabled={loading || !hasEnoughBalance}
+                          className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border-2 border-[#D4A84B]"
                         >
-                          {loading ? "Processing..." : `💰 Deposit $${requiredAmount} for ${periodInfo?.isTestMode ? 'Period' : 'Week'} ${periodInfo?.currentPeriod || 0}`}
-                        </Button>
+                          {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <LottieSpinner size={24} />
+                              Processing...
+                            </span>
+                          ) : `💰 Deposit $${requiredAmount} for ${periodInfo?.isTestMode ? 'Period' : 'Week'} ${periodInfo?.currentPeriod || 0}`}
+                        </button>
                       </>
                     );
                   })()}
 
-                  <p className="text-xs text-gray-500">
-                    ⚠️ Gasless transaction powered by zkLogin
-                  </p>
-                  <p className="text-xs text-green-600">
-                    ✓ Your wallet is connected. USDC tokens will be used automatically for this deposit.
-                  </p>
-                </CardContent>
-              </Card>
+                  <div className="space-y-1 pt-2">
+                    <p className="text-xs text-[#6B4F0F] flex items-center gap-1">
+                      <span>⚡</span>
+                      <span>Gasless transaction powered by zkLogin</span>
+                    </p>
+                    <p className="text-xs text-green-700 font-semibold flex items-center gap-1">
+                      <span>✓</span>
+                      <span>Your wallet is connected. USDC tokens will be used automatically</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Fallback claim card for finished rooms when user hasn't joined via this UI */}
             {room.status === "finished" && !isJoined && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Claim Rewards</CardTitle>
-                  <CardDescription>Room has ended</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-gray-50 border border-gray-200 rounded p-4 text-center">
-                    <p className="text-gray-600">You did not join this room.</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Only participants who joined can claim rewards.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-gradient-to-br from-gray-200/60 to-gray-300/40 rounded-2xl p-6 border-3 border-gray-400 shadow-xl">
+                <div className="mb-4">
+                  <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
+                    <span className="text-2xl">🏁</span>
+                    Claim Rewards
+                  </h3>
+                  <p className="text-sm text-gray-700 mt-1">Room has ended</p>
+                </div>
+                <div className="bg-white/80 border-2 border-gray-300 rounded-xl p-5 text-center">
+                  <p className="text-gray-700 font-semibold">You did not join this room</p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Only participants who joined can claim rewards
+                  </p>
+                </div>
+              </div>
             )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Share Room</CardTitle>
-                <CardDescription>Invite friends to join</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Input
-                    readOnly
-                    value={typeof window !== 'undefined' ? `${window.location.origin}/room/${roomId}` : `/room/${roomId}`}
-                    className="text-sm"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        navigator.clipboard.writeText(
-                          `${window.location.origin}/room/${roomId}`
-                        );
-                        alert("Link copied!");
-                      }
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Share Room Card */}
+            <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E8DCC0] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-xl">
+              <div className="mb-4">
+                <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
+                  <span className="text-2xl">📤</span>
+                  Share Room
+                </h3>
+                <p className="text-sm text-[#6B4F0F] mt-1">Invite friends to join</p>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={typeof window !== 'undefined' ? `${window.location.origin}/room/${roomId}` : `/room/${roomId}`}
+                  className="flex-1 px-4 py-3 bg-white border-2 border-[#C9A86C]/40 rounded-xl text-sm text-[#4A3000] font-mono focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      navigator.clipboard.writeText(
+                        `${window.location.origin}/room/${roomId}`
+                      );
+                      alert("Link copied!");
+                    }
+                  }}
+                  className="px-5 py-3 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Right: Details & Participants */}
           <div className="md:col-span-2">
-            <Tabs defaultValue="participants">
-              <TabsList>
-                <TabsTrigger value="participants">Participants</TabsTrigger>
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
-              </TabsList>
+            {/* Custom Tab System */}
+            <div className="mb-4">
+              <div className="flex gap-2 bg-[#8B6914]/10 p-2 rounded-xl border-2 border-[#8B6914]/30">
+                {['participants', 'details', 'history'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      const content = document.querySelectorAll('[data-tab-content]');
+                      content.forEach(c => c.classList.add('hidden'));
+                      document.querySelector(`[data-tab-content="${tab}"]`)?.classList.remove('hidden');
 
-              <TabsContent value="participants" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Leaderboard</CardTitle>
-                    <CardDescription>Ranked by consistency score ({participants.length} participants)</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {participants && participants.length > 0 ? (
-                        participants
-                          .sort((a: Participant, b: Participant) => b.consistencyScore - a.consistencyScore)
-                          .map((participant: Participant, index: number) => (
-                            <div
-                              key={participant.address}
-                              className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                      const buttons = document.querySelectorAll('[data-tab-button]');
+                      buttons.forEach(b => b.classList.remove('active-tab'));
+                      document.querySelector(`[data-tab-button="${tab}"]`)?.classList.add('active-tab');
+                    }}
+                    data-tab-button={tab}
+                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${
+                      tab === 'participants'
+                        ? 'bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] shadow-lg active-tab'
+                        : 'bg-[#8B6914]/20 text-[#6B4F0F] hover:bg-[#8B6914]/30'
+                    }`}
+                  >
+                    {tab === 'participants' ? '👥 Participants' : tab === 'details' ? '📋 Details' : '📜 History'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Participants Tab */}
+            <div data-tab-content="participants">
+              <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+                <div className="mb-6">
+                  <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
+                    <span className="text-2xl">🏆</span>
+                    Leaderboard
+                  </h3>
+                  <p className="text-sm text-[#6B4F0F] mt-1">Ranked by consistency score ({participants.length} participants)</p>
+                </div>
+                <div className="space-y-3">
+                  {participants && participants.length > 0 ? (
+                    participants
+                      .sort((a: Participant, b: Participant) => b.consistencyScore - a.consistencyScore)
+                      .map((participant: Participant, index: number) => (
+                        <div
+                          key={participant.address}
+                          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all hover:scale-102 ${
+                            index === 0
+                              ? 'bg-gradient-to-r from-[#F5E6C8] to-[#EDD9A8] border-[#D4A84B] shadow-lg'
+                              : index === 1
+                              ? 'bg-gradient-to-r from-[#E8E8E8] to-[#D8D8D8] border-[#B0B0B0]'
+                              : index === 2
+                              ? 'bg-gradient-to-r from-[#F0DCC8] to-[#E8D0B8] border-[#C9A86C]'
+                              : 'bg-[#F8F4EC] border-[#D4A84B]/30'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <span className={`font-bold text-2xl ${
+                              index === 0 ? 'text-[#8B6914]' : index === 1 ? 'text-[#707070]' : index === 2 ? 'text-[#A07030]' : 'text-[#6B4F0F]'
+                            }`}>
+                              {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                            </span>
+                            <div>
+                              <div className="font-mono text-sm font-semibold text-[#4A3000]">
+                                {participant.address.slice(0, 8)}...{participant.address.slice(-6)}
+                              </div>
+                              <div className="text-xs text-[#6B4F0F] mt-1">
+                                {participant.depositsCount} deposits
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-[#4A3000] text-lg">${participant.totalDeposit.toFixed(2)}</div>
+                            <div className="text-xs text-[#6B4F0F] font-semibold mt-1">
+                              {participant.consistencyScore}% score
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-center py-12 bg-white/60 rounded-xl border-2 border-dashed border-[#D4A84B]/40">
+                      <span className="text-5xl">🐜</span>
+                      <p className="text-[#6B4F0F] font-semibold mt-4">No participants yet</p>
+                      <p className="text-sm text-[#8B6914] mt-2">Be the first to join this room!</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Details Tab */}
+            <div data-tab-content="details" className="hidden">
+              <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#8B6914]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+                <div className="mb-6">
+                  <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
+                    <span className="text-2xl">📋</span>
+                    Room Details
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between py-3 border-b-2 border-[#D4A84B]/30">
+                    <span className="text-[#6B4F0F] font-semibold">Strategy</span>
+                    <span className="font-bold text-[#4A3000]">{room.strategy}</span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b-2 border-[#D4A84B]/30">
+                    <span className="text-[#6B4F0F] font-semibold">Duration</span>
+                    <span className="font-bold text-[#4A3000]">{room.duration} weeks</span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b-2 border-[#D4A84B]/30">
+                    <span className="text-[#6B4F0F] font-semibold">Weekly Target</span>
+                    <span className="font-bold text-[#4A3000]">${room.weeklyTarget}</span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b-2 border-[#D4A84B]/30">
+                    <span className="text-[#6B4F0F] font-semibold">Total Goal</span>
+                    <span className="font-bold text-[#4A3000]">
+                      ${room.weeklyTarget * room.totalPeriods}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b-2 border-[#D4A84B]/30">
+                    <span className="text-[#6B4F0F] font-semibold">Contract Address</span>
+                    <span className="font-mono text-sm font-bold text-[#4A3000]">0xabc...def</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* History Tab */}
+            <div data-tab-content="history" className="hidden">
+              <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E8DCC0] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-xl">
+                <div className="mb-6">
+                  <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
+                    <span className="text-2xl">📜</span>
+                    Transaction History
+                  </h3>
+                  <p className="text-sm text-[#6B4F0F] mt-1">{history.length} transactions</p>
+                </div>
+                <div className="space-y-3">
+                  {history.length > 0 ? (
+                    history.map((tx, index) => {
+                      const USDC_DECIMALS = 1_000_000;
+                      const amount = (tx.amount / USDC_DECIMALS).toFixed(2);
+                      const date = new Date(tx.timestamp);
+                      const timeAgo = getTimeAgo(date);
+
+                      return (
+                        <div
+                          key={`${tx.txDigest}-${index}`}
+                          className="flex justify-between p-4 bg-[#F8F4EC] rounded-xl border-2 border-[#D4A84B]/30 hover:shadow-lg transition-all"
+                        >
+                          <div>
+                            <div className="font-bold flex items-center gap-2 mb-1">
+                              {tx.type === 'join' ? (
+                                <span className="text-[#2D5A2D]">🎉 Joined Room</span>
+                              ) : (
+                                <span className="text-[#4A3000]">💰 Deposit</span>
+                              )}
+                            </div>
+                            <div className="text-[#6B4F0F] font-mono text-xs mb-1">
+                              {tx.player?.slice(0, 8)}...{tx.player?.slice(-6)}
+                            </div>
+                            {tx.type === 'deposit' && (
+                              <div className="text-[#8B6914] text-xs font-semibold">Week {tx.period + 1}</div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-[#4A3000] text-lg">${amount}</div>
+                            <div className="text-[#6B4F0F] text-xs mb-1">{timeAgo}</div>
+                            <a
+                              href={`https://suiscan.xyz/testnet/tx/${tx.txDigest}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#8B6914] text-xs hover:underline font-semibold"
                             >
-                              <div className="flex items-center gap-3">
-                                <span className="font-bold text-gray-400">#{index + 1}</span>
-                                <div>
-                                  <div className="font-mono text-sm">
-                                    {participant.address.slice(0, 8)}...{participant.address.slice(-6)}
-                                  </div>
-                                  <div className="text-xs text-gray-600">
-                                    {participant.depositsCount} deposits
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold">${participant.totalDeposit.toFixed(2)}</div>
-                                <div className="text-xs text-gray-600">
-                                  {participant.consistencyScore}% score
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <p>No participants yet</p>
-                          <p className="text-sm mt-2">Be the first to join this room!</p>
+                              View →
+                            </a>
+                          </div>
                         </div>
-                      )}
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-12 bg-[#F8F4EC] rounded-xl border-2 border-dashed border-[#D4A84B]/40">
+                      <span className="text-5xl">📭</span>
+                      <p className="text-[#4A3000] font-semibold mt-4">No transactions yet</p>
+                      <p className="text-sm text-[#6B4F0F] mt-2">Join this room to start!</p>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="details" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Room Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-600">Strategy</span>
-                      <span className="font-semibold">{room.strategy}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-600">Duration</span>
-                      <span className="font-semibold">{room.duration} weeks</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-600">Weekly Target</span>
-                      <span className="font-semibold">${room.weeklyTarget}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-600">Total Goal</span>
-                      <span className="font-semibold">
-                        ${room.weeklyTarget * room.totalPeriods}
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-600">Contract Address</span>
-                      <span className="font-mono text-sm">0xabc...def</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="history" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
-                    <CardDescription>{history.length} transactions</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {history.length > 0 ? (
-                        history.map((tx, index) => {
-                          const USDC_DECIMALS = 1_000_000;
-                          const amount = (tx.amount / USDC_DECIMALS).toFixed(2);
-                          const date = new Date(tx.timestamp);
-                          const timeAgo = getTimeAgo(date);
-
-                          return (
-                            <div key={`${tx.txDigest}-${index}`} className="flex justify-between p-3 bg-gray-50 rounded text-sm">
-                              <div>
-                                <div className="font-semibold flex items-center gap-2">
-                                  {tx.type === 'join' ? (
-                                    <span className="text-green-600">🎉 Joined Room</span>
-                                  ) : (
-                                    <span className="text-blue-600">💰 Deposit</span>
-                                  )}
-                                </div>
-                                <div className="text-gray-600 font-mono text-xs">
-                                  {tx.player?.slice(0, 8)}...{tx.player?.slice(-6)}
-                                </div>
-                                {tx.type === 'deposit' && (
-                                  <div className="text-gray-500 text-xs">Week {tx.period + 1}</div>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                <div className="font-semibold">${amount}</div>
-                                <div className="text-gray-600 text-xs">{timeAgo}</div>
-                                <a
-                                  href={`https://suiscan.xyz/testnet/tx/${tx.txDigest}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 text-xs hover:underline"
-                                >
-                                  View →
-                                </a>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <p>No transactions yet</p>
-                          <p className="text-sm mt-2">Join this room to start!</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
