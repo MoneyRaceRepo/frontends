@@ -12,7 +12,7 @@ import { buildJoinRoomTx, buildDepositTx, buildClaimTx } from "@/lib/tx-builder"
 import { buildSponsoredTx } from "@/lib/zklogin-tx";
 import { LottieLoading, LottieSpinner } from "@/components/ui/LottieLoading";
 import { useToast } from "@/components/ui/Toast";
-import { HiUserGroup, HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiCurrencyDollar, HiArrowRight, HiTrendingUp, HiCalendar, HiRefresh, HiKey, HiSparkles, HiLightBulb, HiShare, HiClipboardCopy, HiDocumentText } from "react-icons/hi";
+import { HiUserGroup, HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiCurrencyDollar, HiArrowRight, HiArrowLeft, HiTrendingUp, HiCalendar, HiRefresh, HiKey, HiSparkles, HiLightBulb, HiShare, HiClipboardCopy, HiDocumentText } from "react-icons/hi";
 import { HiBeaker, HiBan, HiPlay, HiOutlineClipboardCopy } from "react-icons/hi";
 import { FaUsers, FaPiggyBank, FaTrophy, FaWallet, FaCoins, FaCheckCircle, FaUserPlus, FaGift, FaChartLine, FaBolt, FaDoorOpen, FaMedal } from "react-icons/fa";
 import { RiCoinsFill, RiVipCrownFill, RiTimeFill, RiHistoryFill, RiMedal2Fill, RiMedal2Line } from "react-icons/ri";
@@ -693,19 +693,26 @@ export default function RoomDetail() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header with Mascot */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-2">
+              {/* Back Button */}
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/20"
+              >
+                <HiArrowLeft className="w-5 h-5 text-white" />
+              </button>
               <div>
                 <h1
-                  className="text-[#4A3000] text-3xl font-bold tracking-wider"
+                  className="text-white text-2xl font-bold tracking-wider"
                   style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
                 >
                   {room.name}
                 </h1>
-                <p className="text-[#8B6914]/60 text-sm font-mono mt-1">#{roomId?.slice(0, 10)}...{roomId?.slice(-6)}</p>
+                <p className="text-white/60 text-sm font-mono mt-1">#{roomId?.slice(0, 10)}...{roomId?.slice(-6)}</p>
               </div>
               {room.isPrivate && (
                 <span className="text-sm px-3 py-1.5 rounded-full bg-[#F0E6D0] text-[#6B4F0F] font-bold border-2 border-[#C9A86C] flex items-center gap-1">
@@ -713,40 +720,39 @@ export default function RoomDetail() {
                 </span>
               )}
               <span
-                className={`text-xs px-3 py-1.5 rounded-full font-bold border-2 flex items-center gap-1 ${
-                  room.currentPeriod >= room.totalPeriods
-                    ? "bg-[#E8F4E8] text-[#2D5A2D] border-[#9BC49B]"
-                    : room.status === "active"
+                className={`text-xs px-3 py-1.5 rounded-full font-bold border-2 flex items-center gap-1 ${room.currentPeriod >= room.totalPeriods
+                  ? "bg-[#E8F4E8] text-[#2D5A2D] border-[#9BC49B]"
+                  : room.status === "active"
                     ? "bg-[#E8F4E8] text-[#2D5A2D] border-[#9BC49B]"
                     : room.status === "pending"
-                    ? "bg-[#FFF8E6] text-[#8B6914] border-[#D4A84B]"
-                    : "bg-[#F0F0F0] text-[#606060] border-[#A0A0A0]"
-                }`}
+                      ? "bg-[#FFF8E6] text-[#8B6914] border-[#D4A84B]"
+                      : "bg-[#F0F0F0] text-[#606060] border-[#A0A0A0]"
+                  }`}
               >
                 {room.currentPeriod >= room.totalPeriods
                   ? <><FaCheckCircle className="w-3 h-3" /> Completed</>
                   : room.status === "active"
-                  ? <><HiSparkles className="w-3 h-3" /> Active</>
-                  : room.status === "pending"
-                  ? <><HiClock className="w-3 h-3" /> Pending</>
-                  : <><FaTrophy className="w-3 h-3" /> Finished</>}
+                    ? <><HiSparkles className="w-3 h-3" /> Active</>
+                    : room.status === "pending"
+                      ? <><HiClock className="w-3 h-3" /> Pending</>
+                      : <><FaTrophy className="w-3 h-3" /> Finished</>}
               </span>
             </div>
-            <p className="text-[#6B4F0F] flex items-center gap-2">
+            <p className="text-white/80 flex items-center gap-2">
               <span className="font-semibold">{room.strategy} Strategy</span>
               <span>•</span>
               <span className="font-mono text-sm">{room.creator?.slice(0, 8)}...{room.creator?.slice(-6)}</span>
             </p>
             {user?.address && (
               <div className="mt-3 flex items-center gap-4">
-                <div className="bg-gradient-to-r from-[#FFB347]/20 to-[#E89530]/20 px-4 py-2 rounded-xl border-2 border-[#D4A84B]/40">
-                  <span className="text-sm font-bold text-[#4A3000] flex items-center gap-1">
+                <div className="bg-gradient-to-r from-[#FFB347]/30 to-[#E89530]/30 px-4 py-2 rounded-xl border-2 border-white/20">
+                  <span className="text-sm font-bold text-white flex items-center gap-1">
                     <FaWallet className="w-4 h-4" /> {usdcBalance} USDC
                   </span>
                 </div>
                 <button
                   onClick={() => router.push("/mint")}
-                  className="text-xs text-[#8B6914] hover:text-[#6B4F0F] underline font-semibold flex items-center gap-1"
+                  className="text-xs text-white/80 hover:text-white underline font-semibold flex items-center gap-1"
                 >
                   Get more USDC <HiArrowRight className="w-3 h-3" />
                 </button>
@@ -814,60 +820,59 @@ export default function RoomDetail() {
         {/* Stats Grid */}
         <div className="grid md:grid-cols-4 gap-4 mb-6">
           {/* Progress Card */}
-          <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><FaChartLine className="w-3 h-3" /> Progress</div>
-            <div className="text-2xl font-bold text-[#4A3000] mb-3">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border-2 border-slate-600/50 shadow-xl hover:shadow-2xl transition-all">
+            <div className="text-xs text-amber-400 font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><FaChartLine className="w-3 h-3" /> Progress</div>
+            <div className="text-2xl font-bold text-white mb-3">
               {room.currentPeriod >= room.totalPeriods ? (
-                <span className="text-green-700 flex items-center gap-1"><HiCheckCircle className="w-5 h-5" /> Completed</span>
+                <span className="text-green-400 flex items-center gap-1"><HiCheckCircle className="w-5 h-5" /> Completed</span>
               ) : (
                 <>{periodInfo?.isTestMode ? 'Period' : 'Week'} {room.currentPeriod}/{room.totalPeriods}</>
               )}
             </div>
-            <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
+            <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
               <div
-                className={`h-2.5 rounded-full transition-all duration-500 relative shadow-sm ${
-                  room.currentPeriod >= room.totalPeriods
-                    ? 'bg-gradient-to-r from-green-500 to-green-600'
-                    : 'bg-gradient-to-r from-[#FFB347] via-[#FF9500] to-[#FF8C00]'
-                }`}
+                className={`h-2.5 rounded-full transition-all duration-500 relative shadow-sm ${room.currentPeriod >= room.totalPeriods
+                  ? 'bg-gradient-to-r from-green-500 to-green-400'
+                  : 'bg-gradient-to-r from-amber-400 via-orange-400 to-orange-500'
+                  }`}
                 style={{ width: `${Math.min(100, (room.currentPeriod / room.totalPeriods) * 100)}%` }}
               >
                 <div className="absolute inset-0 bg-white/30 animate-pulse" />
               </div>
             </div>
             {periodInfo && room.currentPeriod < room.totalPeriods && (
-              <div className="mt-3 text-xs text-[#6B4F0F]">
+              <div className="mt-3 text-xs text-slate-300">
                 Next {periodInfo.isTestMode ? 'period' : 'week'} in:{' '}
-                <span className={`font-bold ${periodInfo.timeUntilNextPeriod <= 10 ? 'text-green-600 animate-pulse' : 'text-[#4A3000]'}`}>
+                <span className={`font-bold ${periodInfo.timeUntilNextPeriod <= 10 ? 'text-green-400 animate-pulse' : 'text-white'}`}>
                   {formatCountdown(periodInfo.timeUntilNextPeriod)}
                 </span>
               </div>
             )}
             {room.currentPeriod >= room.totalPeriods && (
-              <div className="mt-3 text-xs text-green-700 font-bold flex items-center gap-1">
+              <div className="mt-3 text-xs text-green-400 font-bold flex items-center gap-1">
                 <HiSparkles className="w-4 h-4" /> All {room.totalPeriods} periods completed!
               </div>
             )}
           </div>
 
           {/* Total Pool Card */}
-          <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#8B6914]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><RiCoinsFill className="w-3 h-3" /> Total Pool</div>
-            <div className="text-2xl font-bold text-[#4A3000]">
+          <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-2xl p-6 border-2 border-emerald-500/50 shadow-xl hover:shadow-2xl transition-all">
+            <div className="text-xs text-emerald-300 font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><RiCoinsFill className="w-3 h-3" /> Total Pool</div>
+            <div className="text-2xl font-bold text-white">
               ${participants.reduce((sum, p) => sum + p.totalDeposit, 0).toFixed(2)}
             </div>
           </div>
 
           {/* Reward Pool Card */}
-          <div className="bg-gradient-to-br from-[#E8DCC0] to-[#D4C4A0] rounded-2xl p-6 border-3 border-[#C9A86C]/60 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><FaTrophy className="w-3 h-3" /> Reward Pool</div>
-            <div className="text-2xl font-bold text-[#4A3000]">${room.rewardPool}</div>
+          <div className="bg-gradient-to-br from-amber-600 to-amber-800 rounded-2xl p-6 border-2 border-amber-400/50 shadow-xl hover:shadow-2xl transition-all">
+            <div className="text-xs text-amber-200 font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><FaTrophy className="w-3 h-3" /> Reward Pool</div>
+            <div className="text-2xl font-bold text-white">${room.rewardPool}</div>
           </div>
 
           {/* Participants Card */}
-          <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E0D4B8] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-lg hover:shadow-xl transition-all">
-            <div className="text-xs text-[#6B4F0F] font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><HiUserGroup className="w-3 h-3" /> Participants</div>
-            <div className="text-2xl font-bold text-[#4A3000]">{participants.length}</div>
+          <div className="bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl p-6 border-2 border-purple-500/50 shadow-xl hover:shadow-2xl transition-all">
+            <div className="text-xs text-purple-300 font-semibold mb-2 uppercase tracking-wide flex items-center gap-1"><HiUserGroup className="w-3 h-3" /> Participants</div>
+            <div className="text-2xl font-bold text-white">{participants.length}</div>
           </div>
         </div>
 
@@ -892,7 +897,7 @@ export default function RoomDetail() {
               const roomAlreadyStarted = room.currentPeriod > 0;
 
               return (
-                <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+                <div className="bg-[#FDF8EC] rounded-2xl p-6 border-2 border-[#D4A84B] shadow-xl">
                   <div className="mb-4">
                     <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
                       <FaUserPlus className="w-6 h-6 text-[#D4A84B]" />
@@ -1083,7 +1088,7 @@ export default function RoomDetail() {
 
             {/* Deposit Card - Show only if joined AND periods not completed */}
             {room.status === "active" && isJoined && room.currentPeriod < room.totalPeriods && (
-              <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+              <div className="bg-[#FDF8EC] rounded-2xl p-6 border-2 border-[#D4A84B] shadow-xl">
                 <div className="mb-4">
                   <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
                     <FaCoins className="w-6 h-6 text-[#D4A84B]" />
@@ -1103,11 +1108,10 @@ export default function RoomDetail() {
 
                   {/* Period Info */}
                   {periodInfo && (
-                    <div className={`border-2 rounded-xl p-4 ${
-                      periodInfo.isTestMode
-                        ? 'bg-[#FFF4E6] border-[#D4A84B]/60'
-                        : 'bg-[#F0E6D0] border-[#C9A86C]/60'
-                    }`}>
+                    <div className={`border-2 rounded-xl p-4 ${periodInfo.isTestMode
+                      ? 'bg-[#FFF4E6] border-[#D4A84B]/60'
+                      : 'bg-[#F0E6D0] border-[#C9A86C]/60'
+                      }`}>
                       <div className="text-sm font-bold mb-2 text-[#4A3000]">
                         Current {periodInfo.isTestMode ? 'Period' : 'Week'}: {periodInfo.currentPeriod}
                       </div>
@@ -1218,7 +1222,7 @@ export default function RoomDetail() {
             )}
 
             {/* Share Room Card */}
-            <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E8DCC0] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-xl">
+            <div className="bg-[#FDF8EC] rounded-2xl p-6 border-2 border-[#D4A84B] shadow-xl">
               <div className="mb-4">
                 <h3 className="text-[#4A3000] font-bold text-lg flex items-center gap-2">
                   <HiShare className="w-6 h-6 text-[#D4A84B]" />
@@ -1253,7 +1257,7 @@ export default function RoomDetail() {
           <div className="md:col-span-2">
             {/* Custom Tab System */}
             <div className="mb-4">
-              <div className="flex gap-2 bg-[#8B6914]/10 p-2 rounded-xl border-2 border-[#8B6914]/30">
+              <div className="flex gap-2 bg-[#FDF8EC] p-2 rounded-xl border-2 border-[#D4A84B]">
                 {['participants', 'details', 'history'].map((tab) => (
                   <button
                     key={tab}
@@ -1267,11 +1271,10 @@ export default function RoomDetail() {
                       document.querySelector(`[data-tab-button="${tab}"]`)?.classList.add('active-tab');
                     }}
                     data-tab-button={tab}
-                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${
-                      tab === 'participants'
-                        ? 'bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] shadow-lg active-tab'
-                        : 'bg-[#8B6914]/20 text-[#6B4F0F] hover:bg-[#8B6914]/30'
-                    }`}
+                    className={`flex-1 px-4 py-3 rounded-lg font-bold transition-all ${tab === 'participants'
+                      ? 'bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] shadow-lg active-tab'
+                      : 'bg-[#E8DCC0] text-[#6B4F0F] hover:bg-[#D4A84B]/30'
+                      }`}
                   >
                     {tab === 'participants' ? <><HiUserGroup className="inline w-4 h-4 mr-1" /> Participants</> : tab === 'details' ? <><HiClipboardCopy className="inline w-4 h-4 mr-1" /> Details</> : <><RiHistoryFill className="inline w-4 h-4 mr-1" /> History</>}
                   </button>
@@ -1281,7 +1284,7 @@ export default function RoomDetail() {
 
             {/* Participants Tab */}
             <div data-tab-content="participants">
-              <div className="bg-gradient-to-br from-[#FFB347]/20 to-[#E89530]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+              <div className="bg-[#FDF8EC] rounded-2xl p-6 border-2 border-[#D4A84B] shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
                     <FaTrophy className="w-6 h-6 text-[#D4A84B]" />
@@ -1296,23 +1299,21 @@ export default function RoomDetail() {
                       .map((participant: Participant, index: number) => (
                         <div
                           key={participant.address}
-                          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all hover:scale-102 ${
-                            index === 0
-                              ? 'bg-gradient-to-r from-[#F5E6C8] to-[#EDD9A8] border-[#D4A84B] shadow-lg'
-                              : index === 1
+                          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all hover:scale-102 ${index === 0
+                            ? 'bg-gradient-to-r from-[#F5E6C8] to-[#EDD9A8] border-[#D4A84B] shadow-lg'
+                            : index === 1
                               ? 'bg-gradient-to-r from-[#E8E8E8] to-[#D8D8D8] border-[#B0B0B0]'
                               : index === 2
-                              ? 'bg-gradient-to-r from-[#F0DCC8] to-[#E8D0B8] border-[#C9A86C]'
-                              : 'bg-[#F8F4EC] border-[#D4A84B]/30'
-                          }`}
+                                ? 'bg-gradient-to-r from-[#F0DCC8] to-[#E8D0B8] border-[#C9A86C]'
+                                : 'bg-[#F8F4EC] border-[#D4A84B]/30'
+                            }`}
                         >
                           <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                              index === 0 ? 'bg-gradient-to-br from-[#FFD700] to-[#FFA500] text-white shadow-lg' 
-                              : index === 1 ? 'bg-gradient-to-br from-[#C0C0C0] to-[#A0A0A0] text-white shadow-md' 
-                              : index === 2 ? 'bg-gradient-to-br from-[#CD7F32] to-[#A0522D] text-white shadow-md' 
-                              : 'bg-[#E8D5A8] text-[#6B4F0F]'
-                            }`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${index === 0 ? 'bg-gradient-to-br from-[#FFD700] to-[#FFA500] text-white shadow-lg'
+                              : index === 1 ? 'bg-gradient-to-br from-[#C0C0C0] to-[#A0A0A0] text-white shadow-md'
+                                : index === 2 ? 'bg-gradient-to-br from-[#CD7F32] to-[#A0522D] text-white shadow-md'
+                                  : 'bg-[#E8D5A8] text-[#6B4F0F]'
+                              }`}>
                               {index === 0 ? <RiVipCrownFill className="w-5 h-5" /> : index === 1 ? '2' : index === 2 ? '3' : index + 1}
                             </div>
                             <div>
@@ -1345,7 +1346,7 @@ export default function RoomDetail() {
 
             {/* Details Tab */}
             <div data-tab-content="details" className="hidden">
-              <div className="bg-gradient-to-br from-[#D4A84B]/20 to-[#8B6914]/10 rounded-2xl p-6 border-3 border-[#D4A84B]/40 shadow-xl">
+              <div className="bg-[#FDF8EC] rounded-2xl p-6 border-2 border-[#D4A84B] shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
                     <HiClipboardCopy className="w-6 h-6 text-[#D4A84B]" />
@@ -1381,7 +1382,7 @@ export default function RoomDetail() {
 
             {/* History Tab */}
             <div data-tab-content="history" className="hidden">
-              <div className="bg-gradient-to-br from-[#F0E6D0] to-[#E8DCC0] rounded-2xl p-6 border-3 border-[#C9A86C]/50 shadow-xl">
+              <div className="bg-[#FDF8EC] rounded-2xl p-6 border-2 border-[#D4A84B] shadow-xl">
                 <div className="mb-6">
                   <h3 className="text-[#4A3000] font-bold text-xl flex items-center gap-2">
                     <RiHistoryFill className="w-6 h-6 text-[#D4A84B]" />
