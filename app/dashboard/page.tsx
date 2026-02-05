@@ -370,7 +370,6 @@ export default function Dashboard() {
 
                   {/* Stats Grid - Enhanced */}
                   <div className="grid grid-cols-2 gap-3">
-<<<<<<< HEAD
                     <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
                       <span className="text-[#8B6914] text-xs font-medium block mb-1">Your Deposit</span>
                       <span className="text-[#4A3000] text-lg font-bold">${room.myDeposit.toFixed(2)}</span>
@@ -378,15 +377,6 @@ export default function Dashboard() {
                     <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
                       <span className="text-[#8B6914] text-xs font-medium block mb-1">Total Pool</span>
                       <span className="text-[#4A3000] text-lg font-bold">${room.totalDeposit.toFixed(2)}</span>
-=======
-                    <div className="bg-gradient-to-br from-[#4A9B7F] to-[#3D8068] rounded-xl p-3 text-center shadow-lg">
-                      <span className="text-white/80 text-xs font-medium block mb-1">Your Deposit</span>
-                      <span className="text-white text-lg font-bold">${room.myDeposit}</span>
-                    </div>
-                    <div className="bg-gradient-to-br from-[#B08D57] to-[#8B6914] rounded-xl p-3 text-center shadow-lg">
-                      <span className="text-white/80 text-xs font-medium block mb-1">Total Pool</span>
-                      <span className="text-white text-lg font-bold">${room.totalDeposit}</span>
->>>>>>> 4009e45b68a8ec211a99f91e22942569d8f02e8c
                     </div>
                   </div>
                 </div>
