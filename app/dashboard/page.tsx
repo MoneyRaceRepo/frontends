@@ -188,31 +188,28 @@ export default function Dashboard() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => setActiveTab("active")}
-          className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
-            activeTab === "active"
-              ? 'bg-[#8B6914]/50 text-white shadow-md'
-              : 'bg-[#8B6914]/20 text-[#E8D5A8] hover:bg-[#8B6914]/35'
-          }`}
+          className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${activeTab === "active"
+            ? 'bg-[#8B6914]/50 text-white shadow-md'
+            : 'bg-[#8B6914]/20 text-[#E8D5A8] hover:bg-[#8B6914]/35'
+            }`}
         >
           Active Rooms ({activeRooms.length})
         </button>
         <button
           onClick={() => setActiveTab("my-rooms")}
-          className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
-            activeTab === "my-rooms"
-              ? 'bg-[#8B6914]/50 text-white shadow-md'
-              : 'bg-[#8B6914]/20 text-[#E8D5A8] hover:bg-[#8B6914]/35'
-          }`}
+          className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${activeTab === "my-rooms"
+            ? 'bg-[#8B6914]/50 text-white shadow-md'
+            : 'bg-[#8B6914]/20 text-[#E8D5A8] hover:bg-[#8B6914]/35'
+            }`}
         >
           My Rooms ({myRooms.length})
         </button>
         <button
           onClick={() => setActiveTab("ended")}
-          className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
-            activeTab === "ended"
-              ? 'bg-[#8B6914]/50 text-white shadow-md'
-              : 'bg-[#8B6914]/20 text-[#E8D5A8] hover:bg-[#8B6914]/35'
-          }`}
+          className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${activeTab === "ended"
+            ? 'bg-[#8B6914]/50 text-white shadow-md'
+            : 'bg-[#8B6914]/20 text-[#E8D5A8] hover:bg-[#8B6914]/35'
+            }`}
         >
           Ended ({endedRooms.length})
         </button>
@@ -269,14 +266,14 @@ export default function Dashboard() {
                 >
                   {/* Decorative gradient on hover */}
                   <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#FFB347]/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-                  
+
                   <div className="flex justify-between items-start mb-4 relative">
                     <div className="flex items-start gap-3">
                       {/* Room Icon */}
                       <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                         <FaPiggyBank className="w-6 h-6 text-[#4A3000]" />
                       </div>
-                      
+
                       <div>
                         <h3 className="font-bold text-[#4A3000] text-lg group-hover:text-[#8B6914] transition-colors">{room.name}</h3>
                         <p className="text-[#8B6914]/60 text-xs font-mono mb-1">#{room.roomAddress?.slice(0, 10)}...{room.roomAddress?.slice(-6)}</p>
@@ -288,7 +285,7 @@ export default function Dashboard() {
                       Active
                     </span>
                   </div>
-                  
+
                   {/* Progress Section */}
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
@@ -303,16 +300,17 @@ export default function Dashboard() {
                     <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
                       <div
                         className="bg-gradient-to-r from-[#FFB347] via-[#FF9500] to-[#FF8C00] h-full rounded-full transition-all duration-500 relative shadow-sm"
-                        style={{ width: `${room.depositsCount !== undefined
-                          ? (room.depositsCount / room.totalPeriods) * 100
-                          : (room.currentPeriod / room.totalPeriods) * 100}%`
+                        style={{
+                          width: `${room.depositsCount !== undefined
+                            ? (room.depositsCount / room.totalPeriods) * 100
+                            : (room.currentPeriod / room.totalPeriods) * 100}%`
                         }}
                       >
                         <div className="absolute inset-0 bg-white/30 animate-pulse" />
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
@@ -379,97 +377,96 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-            {myRooms.map((room) => {
-              const progressPercent = Math.min((room.depositsCount / room.totalPeriods) * 100, 100);
-              const weeklyTarget = room.depositAmount / 1_000_000;
-              
-              return (
-                <div
-                  key={room.roomId}
-                  onClick={() => handleRoomClick(room.roomId)}
-                  className="group bg-[#F5EDD8] rounded-2xl p-5 cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 border-[#D4A84B]/40 hover:border-[#D4A84B] relative overflow-hidden"
-                >
-                  {/* Decorative gradient on hover */}
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#FFB347]/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-                  
-                  {/* Header */}
-                  <div className="flex justify-between items-start mb-4 relative">
-                    <div className="flex items-start gap-3">
-                      {/* Room Icon */}
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                        <RiCoinsFill className="w-6 h-6 text-[#4A3000]" />
+              {myRooms.map((room) => {
+                const progressPercent = Math.min((room.depositsCount / room.totalPeriods) * 100, 100);
+                const weeklyTarget = room.depositAmount / 1_000_000;
+
+                return (
+                  <div
+                    key={room.roomId}
+                    onClick={() => handleRoomClick(room.roomId)}
+                    className="group bg-[#F5EDD8] rounded-2xl p-5 cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 border-[#D4A84B]/40 hover:border-[#D4A84B] relative overflow-hidden"
+                  >
+                    {/* Decorative gradient on hover */}
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[#FFB347]/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-4 relative">
+                      <div className="flex items-start gap-3">
+                        {/* Room Icon */}
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#FFB347] to-[#E89530] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                          <RiCoinsFill className="w-6 h-6 text-[#4A3000]" />
+                        </div>
+
+                        <div>
+                          <h3 className="font-bold text-[#4A3000] text-lg flex items-center gap-2 group-hover:text-[#8B6914] transition-colors">
+                            {room.name || `Room #${room.roomId.slice(0, 8)}`}
+                            {room.isPrivate && (
+                              <span className="px-2 py-0.5 bg-purple-500 text-white text-[10px] rounded-full flex items-center gap-1 shadow">
+                                <HiLockClosed className="w-3 h-3" />
+                                Private
+                              </span>
+                            )}
+                          </h3>
+                          <p className="text-[#8B6914]/70 text-xs font-mono">#{room.roomId.slice(0, 10)}...{room.roomId.slice(-6)}</p>
+                        </div>
                       </div>
-                      
-                      <div>
-                        <h3 className="font-bold text-[#4A3000] text-lg flex items-center gap-2 group-hover:text-[#8B6914] transition-colors">
-                          {room.name || `Room #${room.roomId.slice(0, 8)}`}
-                          {room.isPrivate && (
-                            <span className="px-2 py-0.5 bg-purple-500 text-white text-[10px] rounded-full flex items-center gap-1 shadow">
-                              <HiLockClosed className="w-3 h-3" />
-                              Private
-                            </span>
-                          )}
-                        </h3>
-                        <p className="text-[#8B6914]/70 text-xs font-mono">#{room.roomId.slice(0, 10)}...{room.roomId.slice(-6)}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Status Badge */}
-                    <span className={`px-3 py-1.5 text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5 ${
-                      room.status === 0 
-                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' 
-                        : room.status === 1 
-                          ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-[#4A3000]' 
+
+                      {/* Status Badge */}
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5 ${room.status === 0
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+                        : room.status === 1
+                          ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-[#4A3000]'
                           : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
-                    }`}>
-                      {room.status === 0 && <HiSparkles className="w-3 h-3" />}
-                      {room.status === 0 ? 'Active' : room.status === 1 ? <><FaGift className="w-3 h-3" /> Claiming</> : 'Ended'}
-                    </span>
-                  </div>
-                  
-                  {/* Progress Section */}
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[#8B6914] text-xs font-medium">Savings Progress</span>
-                      <span className="text-[#4A3000] text-xs font-semibold">{room.depositsCount} / {room.totalPeriods} Deposit</span>
+                        }`}>
+                        {room.status === 0 && <HiSparkles className="w-3 h-3" />}
+                        {room.status === 0 ? 'Active' : room.status === 1 ? <><FaGift className="w-3 h-3" /> Claiming</> : 'Ended'}
+                      </span>
                     </div>
-                    <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-[#FFB347] via-[#FF9500] to-[#FF8C00] h-full rounded-full transition-all duration-500 relative shadow-sm"
-                        style={{ width: `${progressPercent}%` }}
-                      >
-                        <div className="absolute inset-0 bg-white/30 animate-pulse" />
+
+                    {/* Progress Section */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[#8B6914] text-xs font-medium">Savings Progress</span>
+                        <span className="text-[#4A3000] text-xs font-semibold">{room.depositsCount} / {room.totalPeriods} Deposit</span>
+                      </div>
+                      <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-[#FFB347] via-[#FF9500] to-[#FF8C00] h-full rounded-full transition-all duration-500 relative shadow-sm"
+                          style={{ width: `${progressPercent}%` }}
+                        >
+                          <div className="absolute inset-0 bg-white/30 animate-pulse" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
-                      <span className="text-[#8B6914] text-[10px] uppercase tracking-wide font-medium">Your Deposit</span>
-                      <p className="font-bold text-green-600 text-lg">${room.myDeposit}</p>
-                      <span className="text-[#8B6914]/60 text-[10px]">USDC</span>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
+                        <span className="text-[#8B6914] text-[10px] uppercase tracking-wide font-medium">Your Deposit</span>
+                        <p className="font-bold text-green-600 text-lg">${room.myDeposit}</p>
+                        <span className="text-[#8B6914]/60 text-[10px]">USDC</span>
+                      </div>
+                      <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
+                        <span className="text-[#8B6914] text-[10px] uppercase tracking-wide font-medium">Weekly Target</span>
+                        <p className="font-bold text-[#4A3000] text-lg">${weeklyTarget.toFixed(0)}</p>
+                        <span className="text-[#8B6914]/60 text-[10px]">USDC</span>
+                      </div>
+                      <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
+                        <span className="text-[#8B6914] text-[10px] uppercase tracking-wide font-medium">Duration</span>
+                        <p className="font-bold text-[#4A3000] text-lg">{room.totalPeriods}</p>
+                        <span className="text-[#8B6914]/60 text-[10px]">weeks</span>
+                      </div>
                     </div>
-                    <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
-                      <span className="text-[#8B6914] text-[10px] uppercase tracking-wide font-medium">Weekly Target</span>
-                      <p className="font-bold text-[#4A3000] text-lg">${weeklyTarget.toFixed(0)}</p>
-                      <span className="text-[#8B6914]/60 text-[10px]">USDC</span>
-                    </div>
-                    <div className="bg-[#E8DCC0] rounded-xl p-3 text-center border border-[#D4A84B]/30">
-                      <span className="text-[#8B6914] text-[10px] uppercase tracking-wide font-medium">Duration</span>
-                      <p className="font-bold text-[#4A3000] text-lg">{room.totalPeriods}</p>
-                      <span className="text-[#8B6914]/60 text-[10px]">weeks</span>
+
+                    {/* Action hint on hover */}
+                    <div className="mt-4 flex items-center justify-center gap-2 text-[#8B6914]/60 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span>Click to view details</span>
+                      <HiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
-                  
-                  {/* Action hint on hover */}
-                  <div className="mt-4 flex items-center justify-center gap-2 text-[#8B6914]/60 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Click to view details</span>
-                    <HiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           )
         )}
@@ -505,39 +502,39 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-            {endedRooms.map((room) => (
-              <div
-                key={room.id}
-                onClick={() => handleRoomClick(room.id)}
-                className="group bg-[#F5EDD8] rounded-2xl p-5 cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 border-[#D4A84B]/40 hover:border-[#D4A84B] relative overflow-hidden"
-              >
-                {/* Decorative gradient on hover */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-gray-300/30 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-                
-                <div className="flex justify-between items-start relative">
-                  <div className="flex items-start gap-3">
-                    {/* Room Icon */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                      <HiCheckCircle className="w-6 h-6 text-white" />
+              {endedRooms.map((room) => (
+                <div
+                  key={room.id}
+                  onClick={() => handleRoomClick(room.id)}
+                  className="group bg-[#F5EDD8] rounded-2xl p-5 cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 border-[#D4A84B]/40 hover:border-[#D4A84B] relative overflow-hidden"
+                >
+                  {/* Decorative gradient on hover */}
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-gray-300/30 to-transparent rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+
+                  <div className="flex justify-between items-start relative">
+                    <div className="flex items-start gap-3">
+                      {/* Room Icon */}
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <HiCheckCircle className="w-6 h-6 text-white" />
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-[#4A3000] text-lg group-hover:text-[#8B6914] transition-colors">{room.name}</h3>
+                        <p className="text-[#8B6914]/60 text-xs font-mono mb-1">#{room.roomAddress?.slice(0, 10)}...{room.roomAddress?.slice(-6)}</p>
+                        <p className="text-[#8B6914]/70 text-sm"><FaUsers className="inline w-3 h-3 mr-1" />{room.participants} participants • {room.strategy}</p>
+                      </div>
                     </div>
-                    
-                    <div>
-                      <h3 className="font-bold text-[#4A3000] text-lg group-hover:text-[#8B6914] transition-colors">{room.name}</h3>
-                      <p className="text-[#8B6914]/60 text-xs font-mono mb-1">#{room.roomAddress?.slice(0, 10)}...{room.roomAddress?.slice(-6)}</p>
-                      <p className="text-[#8B6914]/70 text-sm"><FaUsers className="inline w-3 h-3 mr-1" />{room.participants} participants • {room.strategy}</p>
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
+                        <HiCheckCircle className="w-3 h-3" /> Ended
+                      </span>
+                      <button className="px-5 py-2 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-full text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-1">
+                        <FaGift className="w-3 h-3" /> Claim Rewards
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
-                      <HiCheckCircle className="w-3 h-3" /> Ended
-                    </span>
-                    <button className="px-5 py-2 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] font-bold rounded-full text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-1">
-                      <FaGift className="w-3 h-3" /> Claim Rewards
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
             </div>
           )
         )}
