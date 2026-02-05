@@ -6,7 +6,8 @@ import { usdcAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { LottieLoading, LottieSpinner } from '@/components/ui/LottieLoading';
 import { useToast } from '@/components/ui/Toast';
-import { HiArrowLeft, HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiSparkles } from 'react-icons/hi';
+import DashboardLayout from '@/components/DashboardLayout';
+import { HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle } from 'react-icons/hi';
 import { FaCoins, FaWallet, FaGift, FaFaucet, FaMagic } from 'react-icons/fa';
 import { RiCoinsFill, RiExchangeDollarFill } from 'react-icons/ri';
 
@@ -155,24 +156,17 @@ export default function MintUSDCPage() {
   const cooldownRemaining = cooldownInfo?.timeUntilNextMint || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2A1810] to-[#1A0F0A] py-12 px-4">
+    <DashboardLayout>
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-[#FFB347] hover:text-[#FFE4A0] mb-4 flex items-center gap-2 font-medium"
-          >
-            <HiArrowLeft className="w-5 h-5" />
-            Back to Dashboard
-          </button>
           <h2
-            className="text-[#FFE4A0] text-xl font-bold tracking-wider mb-2"
+            className="text-[#4A3000] text-2xl font-bold tracking-wider mb-2"
             style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
           >
             MINT USDC
           </h2>
-          <p className="text-[#FFE4A0]/80 text-sm">
+          <p className="text-[#6B4F0F] text-sm">
             Get free mock USDC tokens for testing
           </p>
         </div>
@@ -316,6 +310,6 @@ export default function MintUSDCPage() {
           </ul>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

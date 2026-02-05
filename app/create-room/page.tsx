@@ -13,12 +13,22 @@ import { RiAiGenerate, RiLockPasswordFill, RiShieldCheckFill } from "react-icons
 
 type Step = 1 | 2 | 3 | 4;
 
+interface DeFiProtocol {
+  name: string;
+  type: string;
+  apy: string;
+  tvl?: string;
+}
+
 interface Strategy {
   id: number;
   name: string;
   expectedReturn: number;
   risk: number;
   description: string;
+  protocols?: DeFiProtocol[];
+  allocation?: { [key: string]: number };
+  suggestedTokens?: string[];
 }
 
 export default function CreateRoom() {
@@ -50,12 +60,15 @@ export default function CreateRoom() {
       const response = await aiAPI.getRecommendation(aiPrompt);
 
       if (response.success && response.strategies) {
-        const mappedStrategies = response.strategies.map((s: any, index: number) => ({
-          id: index,
+        const mappedStrategies = response.strategies.map((s: any) => ({
+          id: s.id || 0,
           name: s.name || s.strategy,
           expectedReturn: s.expectedReturn || s.return_pct || 0,
-          risk: s.risk || s.risk_pct || 0,
-          description: s.description || s.reasoning || "",
+          risk: s.riskLevel === 'low' ? 15 : s.riskLevel === 'medium' ? 35 : 60,
+          description: s.reasoning || s.description || "",
+          protocols: s.protocols || [],
+          allocation: s.allocation || {},
+          suggestedTokens: s.suggestedTokens || [],
         }));
         setStrategies(mappedStrategies);
         setCurrentStep(3);
@@ -485,46 +498,116 @@ export default function CreateRoom() {
                   "from-blue-50 to-cyan-50 border-blue-300",
                   "from-orange-50 to-amber-50 border-orange-300"
                 ];
+                const isSelected = selectedStrategy === strategy.id;
+
                 return (
                   <div
                     key={strategy.id}
                     onClick={() => setSelectedStrategy(strategy.id)}
-                    className={`p-3 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
-                      selectedStrategy === strategy.id
+                    className={`p-4 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
+                      isSelected
                         ? "bg-gradient-to-br from-[#FFB347] to-[#E89530] border-[#D4A84B] shadow-lg scale-[1.01]"
                         : `bg-gradient-to-br ${gradients[index] || 'from-gray-50 to-gray-50 border-gray-300'} hover:shadow-md hover:scale-[1.01]`
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-2">
-                        {(() => { const IconComponent = StrategyIcons[index] || FaGem; return <IconComponent className={`w-6 h-6 ${selectedStrategy === strategy.id ? 'text-white' : 'text-[#4A3000]'}`} />; })()}
-                        <h4 className={`font-bold text-base ${selectedStrategy === strategy.id ? 'text-white' : 'text-[#4A3000]'}`}>
+                        {(() => { const IconComponent = StrategyIcons[index] || FaGem; return <IconComponent className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-[#4A3000]'}`} />; })()}
+                        <h4 className={`font-bold text-lg ${isSelected ? 'text-white' : 'text-[#4A3000]'}`}>
                           {strategy.name}
                         </h4>
                       </div>
-                      {selectedStrategy === strategy.id && (
+                      {isSelected && (
                         <div className="bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
                           <span className="text-green-600 font-bold text-sm">✓</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex gap-3 mb-2">
-                      <div className={`flex-1 px-3 py-2 rounded-lg ${selectedStrategy === strategy.id ? 'bg-white/20' : 'bg-white/80'}`}>
-                        <span className={`text-xs font-semibold block ${selectedStrategy === strategy.id ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Expected Return</span>
-                        <p className={`text-sm font-bold ${selectedStrategy === strategy.id ? 'text-white' : 'text-green-700'}`}>
-                          +{strategy.expectedReturn}%
+                    {/* APY and Risk */}
+                    <div className="flex gap-2 mb-3">
+                      <div className={`flex-1 px-3 py-2 rounded-lg ${isSelected ? 'bg-white/20' : 'bg-white/80'}`}>
+                        <span className={`text-xs font-semibold block ${isSelected ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Expected APY</span>
+                        <p className={`text-base font-bold ${isSelected ? 'text-white' : 'text-green-700'}`}>
+                          {strategy.expectedReturn}%
                         </p>
                       </div>
-                      <div className={`flex-1 px-3 py-2 rounded-lg ${selectedStrategy === strategy.id ? 'bg-white/20' : 'bg-white/80'}`}>
-                        <span className={`text-xs font-semibold block ${selectedStrategy === strategy.id ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Risk Level</span>
-                        <p className={`text-sm font-bold ${selectedStrategy === strategy.id ? 'text-white' : 'text-orange-700'}`}>
-                          {strategy.risk}%
+                      <div className={`flex-1 px-3 py-2 rounded-lg ${isSelected ? 'bg-white/20' : 'bg-white/80'}`}>
+                        <span className={`text-xs font-semibold block ${isSelected ? 'text-white/80' : 'text-[#6B4F0F]'}`}>Risk Level</span>
+                        <p className={`text-base font-bold ${isSelected ? 'text-white' : 'text-orange-700'}`}>
+                          {strategy.risk === 15 ? 'Low' : strategy.risk === 35 ? 'Medium' : 'High'}
                         </p>
                       </div>
                     </div>
 
-                    <p className={`text-xs leading-relaxed ${selectedStrategy === strategy.id ? 'text-white/90' : 'text-[#6B4F0F]'}`}>
+                    {/* DeFi Protocols */}
+                    {strategy.protocols && strategy.protocols.length > 0 && (
+                      <div className={`mb-3 p-3 rounded-lg ${isSelected ? 'bg-white/10' : 'bg-white/60'}`}>
+                        <p className={`text-xs font-semibold mb-2 ${isSelected ? 'text-white/90' : 'text-[#4A3000]'}`}>
+                          📊 DeFi Protocols:
+                        </p>
+                        <div className="space-y-1.5">
+                          {strategy.protocols.map((protocol, idx) => (
+                            <div key={idx} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-[#4A3000]'}`}>
+                                  • {protocol.name}
+                                </span>
+                                <span className={`text-xs ${isSelected ? 'text-white/70' : 'text-[#6B4F0F]'}`}>
+                                  ({protocol.type})
+                                </span>
+                              </div>
+                              <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-green-700'}`}>
+                                {protocol.apy}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Allocation */}
+                    {strategy.allocation && Object.keys(strategy.allocation).length > 0 && (
+                      <div className={`mb-3 p-3 rounded-lg ${isSelected ? 'bg-white/10' : 'bg-white/60'}`}>
+                        <p className={`text-xs font-semibold mb-2 ${isSelected ? 'text-white/90' : 'text-[#4A3000]'}`}>
+                          💰 Allocation:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(strategy.allocation).map(([key, value]) => (
+                            <div key={key} className={`px-2 py-1 rounded ${isSelected ? 'bg-white/20' : 'bg-white/80'}`}>
+                              <span className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-[#4A3000]'}`}>
+                                {key.charAt(0).toUpperCase() + key.slice(1)}: <strong>{value}%</strong>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Suggested Tokens */}
+                    {strategy.suggestedTokens && strategy.suggestedTokens.length > 0 && (
+                      <div className={`mb-3 p-3 rounded-lg ${isSelected ? 'bg-white/10' : 'bg-white/60'}`}>
+                        <p className={`text-xs font-semibold mb-2 ${isSelected ? 'text-white/90' : 'text-[#4A3000]'}`}>
+                          🪙 Tokens:
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {strategy.suggestedTokens.map((token, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                isSelected ? 'bg-white/30 text-white' : 'bg-[#FFB347]/30 text-[#4A3000]'
+                              }`}
+                            >
+                              {token}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Description/Reasoning */}
+                    <p className={`text-xs leading-relaxed ${isSelected ? 'text-white/90' : 'text-[#6B4F0F]'}`}>
                       {strategy.description}
                     </p>
                   </div>

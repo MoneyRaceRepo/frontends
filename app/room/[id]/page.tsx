@@ -823,15 +823,17 @@ export default function RoomDetail() {
                 <>{periodInfo?.isTestMode ? 'Period' : 'Week'} {room.currentPeriod}/{room.totalPeriods}</>
               )}
             </div>
-            <div className="w-full bg-[#8B6914]/20 rounded-full h-3 overflow-hidden border border-[#8B6914]/30">
+            <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
               <div
-                className={`h-3 rounded-full transition-all ${
+                className={`h-2.5 rounded-full transition-all duration-500 relative shadow-sm ${
                   room.currentPeriod >= room.totalPeriods
                     ? 'bg-gradient-to-r from-green-500 to-green-600'
-                    : 'bg-gradient-to-r from-[#FFB347] to-[#E89530]'
+                    : 'bg-gradient-to-r from-[#FFB347] via-[#FF9500] to-[#FF8C00]'
                 }`}
                 style={{ width: `${Math.min(100, (room.currentPeriod / room.totalPeriods) * 100)}%` }}
-              />
+              >
+                <div className="absolute inset-0 bg-white/30 animate-pulse" />
+              </div>
             </div>
             {periodInfo && room.currentPeriod < room.totalPeriods && (
               <div className="mt-3 text-xs text-[#6B4F0F]">

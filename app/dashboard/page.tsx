@@ -26,6 +26,7 @@ interface Room {
   strategy: string;
   status: "active" | "ended";
   isPrivate?: boolean;
+  depositsCount?: number; // Number of deposits user has made (if joined)
 }
 
 interface MyRoom {
@@ -137,7 +138,8 @@ export default function Dashboard() {
         if (myRoom) {
           return {
             ...room,
-            myDeposit: myRoom.myDeposit
+            myDeposit: myRoom.myDeposit,
+            depositsCount: myRoom.depositsCount // Add deposits count for joined rooms
           };
         }
         return room;
@@ -291,12 +293,20 @@ export default function Dashboard() {
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[#8B6914] text-xs font-medium">Progress</span>
-                      <span className="text-[#4A3000] text-xs font-semibold">Week {room.currentPeriod} of {room.totalPeriods}</span>
+                      <span className="text-[#4A3000] text-xs font-semibold">
+                        {room.depositsCount !== undefined
+                          ? `${room.depositsCount} / ${room.totalPeriods} Deposit`
+                          : `Week ${room.currentPeriod} of ${room.totalPeriods}`
+                        }
+                      </span>
                     </div>
                     <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
                       <div
                         className="bg-gradient-to-r from-[#FFB347] via-[#FF9500] to-[#FF8C00] h-full rounded-full transition-all duration-500 relative shadow-sm"
-                        style={{ width: `${(room.currentPeriod / room.totalPeriods) * 100}%` }}
+                        style={{ width: `${room.depositsCount !== undefined
+                          ? (room.depositsCount / room.totalPeriods) * 100
+                          : (room.currentPeriod / room.totalPeriods) * 100}%`
+                        }}
                       >
                         <div className="absolute inset-0 bg-white/30 animate-pulse" />
                       </div>
@@ -421,7 +431,7 @@ export default function Dashboard() {
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[#8B6914] text-xs font-medium">Savings Progress</span>
-                      <span className="text-[#4A3000] text-xs font-semibold">{room.depositsCount} / {room.totalPeriods} weeks</span>
+                      <span className="text-[#4A3000] text-xs font-semibold">{room.depositsCount} / {room.totalPeriods} Deposit</span>
                     </div>
                     <div className="w-full bg-[#D4A84B]/30 rounded-full h-2.5 overflow-hidden">
                       <div

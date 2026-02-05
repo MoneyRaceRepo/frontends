@@ -16,6 +16,7 @@ const menuItems = [
   { icon: "dashboard", label: "DASHBOARD", href: "/dashboard" },
   { icon: "create", label: "CREATE ROOM", href: "/create-room" },
   { icon: "join", label: "JOIN ROOM", href: "/join-private" },
+  { icon: "mint", label: "MINT USDC", href: "/mint" },
   { icon: "history", label: "HISTORY", href: "/history" },
 ];
 
@@ -44,6 +45,11 @@ const MenuIcon = ({ type }: { type: string }) => {
     history: (
       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
+      </svg>
+    ),
+    mint: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.89-8.9c.32-.24.51-.59.51-1.01 0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5h1.25c0-.14.11-.25.25-.25s.25.11.25.25-.11.25-.25.25h-.75v.5h.75c.14 0 .25.11.25.25s-.11.25-.25.25-.25-.11-.25-.25h-1.25c0 .83.67 1.5 1.5 1.5v.5h.5v-.5c.68-.09 1.23-.61 1.35-1.28h-1.35c-.14 0-.25-.11-.25-.25 0-.28.22-.5.5-.5h1.35c-.12-.67-.67-1.19-1.35-1.28v-.5h-.5v.5c-.39.05-.75.23-1.01.52z"/>
       </svg>
     ),
     profile: (
@@ -142,32 +148,19 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
   return (
     <div className="min-h-screen bg-[#B08D57] relative overflow-x-hidden">
       {/* Logo - Top Left Corner */}
-      <div className="fixed left-4 lg:left-6 top-3 lg:top-4 z-20">
-        <h1
-          className="text-white text-xl sm:text-2xl lg:text-3xl font-bold tracking-wider leading-tight"
-          style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-        >
-          MONEY
-        </h1>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <Image
-            src="/akesoris.png"
-            alt="Checkered"
-            width={120}
-            height={24}
-            className="h-4 lg:h-6 w-auto"
-          />
-          <span
-            className="text-white text-lg sm:text-xl lg:text-2xl font-bold tracking-wider"
-            style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-          >
-            RACE
-          </span>
-        </div>
+      <div className="fixed left-0 lg:left-0 top-2 lg:top-3 z-20">
+        <Image
+          src="/moneyracenew.png"
+          alt="Money Race Logo"
+          width={300}
+          height={120}
+          className="h-20 lg:h-28 w-auto object-contain"
+          priority
+        />
       </div>
 
       {/* Sidebar - Sejajar dengan content area */}
-      <aside className="fixed left-0 top-[76px] lg:top-[84px] bottom-0 w-60 sm:w-64 lg:w-72 bg-gradient-to-b from-[#B08D57] to-[#9A7B4A] z-20 flex flex-col py-6 px-4">
+      <aside className="fixed left-0 top-[96px] lg:top-[132px] bottom-0 w-60 sm:w-64 lg:w-72 bg-gradient-to-b from-[#B08D57] to-[#9A7B4A] z-20 flex flex-col py-6 px-4">
         {/* Navigation Menu */}
         <nav className="flex flex-col h-full">
           {/* Main Menu */}
@@ -249,22 +242,22 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
       </aside>
 
       {/* Header with Wallet Info - Fixed at top */}
-      <header className="fixed top-0 right-0 left-60 sm:left-64 lg:left-72 z-30 bg-[#B08D57]/95 backdrop-blur-sm border-b-2 border-[#8B6914]/30 h-[76px] lg:h-[84px]">
+      <header className="fixed top-0 right-0 left-60 sm:left-64 lg:left-72 z-30 bg-[#B08D57]/95 backdrop-blur-sm border-b-2 border-[#8B6914]/30 h-[96px] lg:h-[132px]">
         <div className="flex items-center justify-end px-4 lg:px-8 h-full gap-2 lg:gap-3">
           {/* Wallet Balance */}
-          <div className="bg-[#5A4520]/40 rounded-full px-3 lg:px-5 py-2 lg:py-2.5 flex items-center gap-2 border-2 border-[#8B6914]/50 shadow-lg">
+          <div className="bg-gradient-to-r from-[#915513]/40 to-[#EAC960]/40 rounded-full px-3 lg:px-5 py-2 lg:py-2.5 flex items-center gap-2 border-2 border-[#8B6914]/50 shadow-lg">
             <div className="w-6 lg:w-7 h-6 lg:h-7 rounded-full bg-[#2775CA] flex items-center justify-center">
               <span className="text-white text-xs font-bold">$</span>
             </div>
-            <span className="text-white font-bold text-sm lg:text-base">{usdcBalance} USDC</span>
+            <span className="text-black font-bold text-sm lg:text-base">{usdcBalance} USDC</span>
           </div>
 
           {/* User Info with Avatar */}
-          <div className="bg-[#5A4520]/40 rounded-full px-3 lg:px-5 py-2 lg:py-2.5 flex items-center gap-2 lg:gap-3 border-2 border-[#8B6914]/50 shadow-lg">
+          <div className="bg-gradient-to-r from-[#915513]/40 to-[#EAC960]/40 rounded-full px-3 lg:px-5 py-2 lg:py-2.5 flex items-center gap-2 lg:gap-3 border-2 border-[#8B6914]/50 shadow-lg">
             {/* Mascot Avatar */}
             <div className="flex-shrink-0">
               <Image
-                src="/mascotsemut.png"
+                src="/logo_money_race_coin.png"
                 alt="User Avatar"
                 width={32}
                 height={32}
@@ -287,9 +280,9 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
       </header>
 
       {/* Main Content */}
-      <main className="ml-60 sm:ml-64 lg:ml-72 pt-[76px] lg:pt-[84px] h-screen">
+      <main className="ml-60 sm:ml-64 lg:ml-72 pt-[96px] lg:pt-[132px] h-screen">
         {/* Content Area - fixed height aligned with sidebar sign out */}
-        <div className="h-[calc(100vh-76px)] lg:h-[calc(100vh-84px)] px-4 lg:px-8 pt-6 pb-10">
+        <div className="h-[calc(100vh-96px)] lg:h-[calc(100vh-132px)] px-4 lg:px-8 pt-6 pb-10">
           <div className="h-full bg-[#C9A86C]/60 rounded-2xl lg:rounded-3xl border-2 lg:border-4 border-[#8B6914]/30 shadow-xl flex flex-col">
             {/* Main Content with padding - scrollable inside */}
             <div className="flex-1 px-4 lg:px-8 py-4 lg:py-6 overflow-y-auto custom-scrollbar">

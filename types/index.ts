@@ -37,12 +37,22 @@ export interface Participant {
 }
 
 // Strategy types
+export interface DeFiProtocol {
+  name: string;
+  type: string;
+  apy: string;
+  tvl?: string;
+}
+
 export interface Strategy {
   name: string;
   expectedReturn: number;
   risk: number;
   description: string;
   riskLevel: 'low' | 'medium' | 'high';
+  protocols?: DeFiProtocol[];
+  allocation?: { [key: string]: number };
+  suggestedTokens?: string[];
 }
 
 export interface AIRecommendation {
