@@ -60,13 +60,16 @@ function getApyFromStrategy(strategy: string): number {
 }
 
 // Live Yield Display Component
-function LiveYieldDisplay({ totalPool, strategy, startTime, realizedYield }: {
+function LiveYieldDisplay({ totalPool, strategy, startTime, realizedYield, storageKey }: {
   totalPool: number;
   strategy: string;
   startTime: Date;
   realizedYield: number;
+  storageKey: string;
 }) {
   const [yieldAmount, setYieldAmount] = useState(realizedYield);
+  const lastRealizedYieldRef = useRef(realizedYield);
+  const lastPersistRef = useRef(0);
 
   useEffect(() => {
     if (totalPool <= 0 && realizedYield <= 0) {
@@ -78,27 +81,56 @@ function LiveYieldDisplay({ totalPool, strategy, startTime, realizedYield }: {
     // Calculate per-second yield: TotalPool * APY / (365 * 24 * 60 * 60)
     const yieldPerSecond = (totalPool * apy) / 31536000;
 
-    // Initial accrued calculation (Simulation)
     const now = Date.now();
-    const start = startTime.getTime();
-    const elapsedSeconds = (now - start) / 1000;
-    const initialSimulated = yieldPerSecond * elapsedSeconds;
+    const yieldStorageKey = `liveYield_${storageKey}`;
+    const yieldTsKey = `liveYieldTs_${storageKey}`;
 
-    // Hybrid Launch: Start at MAX(Realized, Simulated)
-    // Use simulated value only if it's plausible (non-negative)
-    let currentVal = Math.max(realizedYield, initialSimulated > 0 ? initialSimulated : 0);
-    setYieldAmount(currentVal);
+    let baseYield = realizedYield;
+    if (typeof window !== 'undefined') {
+      const storedYield = parseFloat(localStorage.getItem(yieldStorageKey) || "");
+      const storedTs = parseInt(localStorage.getItem(yieldTsKey) || "", 10);
+      if (!Number.isNaN(storedYield) && !Number.isNaN(storedTs) && storedTs > 0) {
+        const elapsedSec = Math.max(0, (now - storedTs) / 1000);
+        const accrued = storedYield + (yieldPerSecond * elapsedSec);
+        baseYield = Math.max(baseYield, accrued);
+      }
+    }
+
+    // If realizedYield from backend increased, sync with it
+    if (realizedYield > lastRealizedYieldRef.current) {
+      console.log('???? Syncing yield with backend:', realizedYield.toFixed(6));
+      baseYield = Math.max(baseYield, realizedYield);
+      lastRealizedYieldRef.current = realizedYield;
+    } else if (lastRealizedYieldRef.current === 0) {
+      // First load - start from backend value
+      lastRealizedYieldRef.current = realizedYield;
+    }
+
+    setYieldAmount(baseYield);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(yieldStorageKey, baseYield.toString());
+      localStorage.setItem(yieldTsKey, now.toString());
+      lastPersistRef.current = now;
+    }
 
     // Increment by yieldPerSecond / 10 every 100ms
     const interval = setInterval(() => {
-      // Just add expected increment
-      // Ideally we should track "simulated" separately and compare Max every tick,
-      // but purely additive ticking is smoother and safer given "Realized" is static floor.
-      setYieldAmount(prev => prev + (yieldPerSecond / 10));
+      setYieldAmount(prev => {
+        const next = prev + (yieldPerSecond / 10);
+        if (typeof window !== 'undefined') {
+          const persistNow = Date.now();
+          if (persistNow - lastPersistRef.current >= 1000) {
+            localStorage.setItem(yieldStorageKey, next.toString());
+            localStorage.setItem(yieldTsKey, persistNow.toString());
+            lastPersistRef.current = persistNow;
+          }
+        }
+        return next;
+      });
     }, 100);
 
     return () => clearInterval(interval);
-  }, [totalPool, strategy, realizedYield]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [totalPool, strategy, realizedYield, storageKey, startTime]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <span className="font-mono tabular-nums">
@@ -204,6 +236,21 @@ export default function RoomDetail() {
 
     return () => clearInterval(timer);
   }, [periodInfo?.currentPeriod]);
+
+  // Periodic refresh to sync yield with backend database (every 30 seconds)
+  useEffect(() => {
+    if (!roomId || !roomData?.status) return;
+    
+    // Only sync when room is active
+    if (roomData?.status !== 'active') return;
+
+    const syncInterval = setInterval(() => {
+      console.log('⏰ Syncing yield with backend...');
+      fetchRoomData();
+    }, 30000); // Every 30 seconds
+
+    return () => clearInterval(syncInterval);
+  }, [roomId, roomData?.status]);
 
   // Refetch participants when roomData becomes available to recalculate scores correctly
   useEffect(() => {
@@ -445,7 +492,13 @@ export default function RoomDetail() {
           status: roomStatus,
           participants: [], // TODO: Query from blockchain
           isPrivate: blockchainData.is_private || false,
+          startTimeMs: startTimeMs, // Stable timestamp for live yield calculation
         };
+
+        // Persist blockchain startTimeMs to localStorage for stable live yield
+        if (typeof window !== 'undefined' && startTimeMs) {
+          localStorage.setItem(`roomStartTime_${roomId}`, startTimeMs.toString());
+        }
 
         setRoomData(transformedRoom);
         setError(""); // Clear any previous errors
@@ -458,6 +511,23 @@ export default function RoomDetail() {
       toast.error("Connection Error", "Unable to load room data. Please check your connection.");
       // Use mock data as fallback
     }
+  };
+
+  // Helper function to get stable start time for live yield (persisted in localStorage)
+  const getStableStartTime = (roomIdParam: string): number => {
+    if (typeof window === 'undefined') return Date.now();
+    
+    const storageKey = `roomStartTime_${roomIdParam}`;
+    const stored = localStorage.getItem(storageKey);
+    
+    if (stored) {
+      return parseInt(stored, 10);
+    }
+    
+    // First visit - create stable start time (now) and persist it
+    const newStartTime = Date.now();
+    localStorage.setItem(storageKey, newStartTime.toString());
+    return newStartTime;
   };
 
   // Mock data - replace with API call
@@ -474,6 +544,7 @@ export default function RoomDetail() {
     strategy: "Stable",
     status: "active" as const,
     isPrivate: false,
+    startTimeMs: getStableStartTime(roomId), // Use stable persisted time
     participants: [
       { address: "0x123...abc", totalDeposit: 300, depositsCount: 3, consistencyScore: 100 },
       { address: "0x456...def", totalDeposit: 300, depositsCount: 3, consistencyScore: 100 },
@@ -1094,8 +1165,9 @@ export default function RoomDetail() {
                 <LiveYieldDisplay
                   totalPool={room.totalDeposit || 0}
                   strategy={room.strategy}
-                  startTime={history.length > 0 ? new Date(Math.min(...history.map(h => new Date(h.timestamp).getTime()))) : new Date(Date.now() - 60000)}
+                  startTime={new Date(room.startTimeMs || getStableStartTime(roomId))}
                   realizedYield={room.rewardPool || 0}
+                  storageKey={roomId}
                 />
               ) : (
                 <span>${(room.rewardPool || 0).toFixed(2)}</span>
