@@ -95,12 +95,17 @@ export default function Home() {
 
   return (
     <GoogleOAuthProvider>
-      <main className="min-h-screen bg-gold-gradient overflow-hidden">
+      <main className="min-h-screen bg-hero-wow overflow-hidden">
         {/* Header */}
         <Header />
 
         {/* Hero Section */}
         <section className="relative pt-20 pb-32 px-6 overflow-visible">
+          {/* Animated Background Glow */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 left-10 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-20 right-10 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          </div>
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[600px]">
               {/* Left side - Coin */}
@@ -154,10 +159,10 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Login buttons */}
-                <div className="flex flex-col sm:flex-row items-center gap-2 justify-center lg:justify-start pt-4">
+                {/* Login buttons - Improved spacing */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start pt-4">
                   {/* Google Sign In Button */}
-                  <div className="w-full max-w-xs">
+                  <div className="w-full sm:w-auto">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={() => setLoginError('Google sign-in failed. Please try again.')}
@@ -169,7 +174,7 @@ export default function Home() {
                     />
                   </div>
 
-                  <span className="text-amber-100/70 text-sm font-bold uppercase tracking-wider px-2">OR</span>
+                  <span className="text-amber-100/80 text-xs font-bold uppercase tracking-wider px-1 my-1">or</span>
 
                   {/* Sui Wallet Connect Button */}
                   <div className="sui-wallet-button">
@@ -213,9 +218,9 @@ export default function Home() {
               READY TO LOGIN? ENTER YOUR EMAIL TO CREATE OR USE YOUR WALLET
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
               {/* Google Sign In Button */}
-              <div className="w-full max-w-xs">
+              <div className="w-full sm:w-auto">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={() => setLoginError('Google sign-in failed. Please try again.')}
@@ -227,7 +232,7 @@ export default function Home() {
                 />
               </div>
 
-              <span className="text-amber-100/70 text-sm font-bold uppercase tracking-wider">OR</span>
+              <span className="text-amber-100/80 text-xs font-bold uppercase tracking-wider px-1 my-1">or</span>
 
               {/* Sui Wallet Connect Button */}
               <div className="sui-wallet-button">

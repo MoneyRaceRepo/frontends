@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { LottieLoading, LottieSpinner } from '@/components/ui/LottieLoading';
 import { useToast } from '@/components/ui/Toast';
 import DashboardLayout from '@/components/DashboardLayout';
-import { HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle } from 'react-icons/hi';
+import { HiClock, HiLockClosed, HiCheckCircle, HiExclamationCircle, HiInformationCircle } from 'react-icons/hi';
 import { FaCoins, FaWallet, FaGift, FaFaucet, FaMagic } from 'react-icons/fa';
 import { RiCoinsFill, RiExchangeDollarFill } from 'react-icons/ri';
 
@@ -157,159 +157,175 @@ export default function MintUSDCPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h2
-            className="text-[#4A3000] text-2xl font-bold tracking-wider mb-2"
-            style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-          >
-            MINT USDC
-          </h2>
-          <p className="text-[#6B4F0F] text-sm">
-            Get free mock USDC tokens for testing
-          </p>
-        </div>
-
-        {/* Balance Card */}
-        <div className="bg-[#F5EDD8] rounded-2xl shadow-xl p-6 mb-6 border-2 border-[#D4A84B]/40">
-          <h2 className="text-lg font-semibold text-[#8B6914] mb-2">
-            Current Balance
-          </h2>
-          <div className="text-4xl font-bold text-[#4A3000]">
-            {balanceFormatted} <span className="text-[#8B6914]">USDC</span>
-          </div>
-          <p className="text-sm text-[#8B6914]/70 mt-2">
-            Address: {user.address.slice(0, 8)}...{user.address.slice(-6)}
-          </p>
-        </div>
-
-        {/* Mint Card */}
-        <div className="bg-[#F5EDD8] rounded-2xl shadow-xl p-6 mb-6 border-2 border-[#D4A84B]/40">
-          <h2 className="text-xl font-bold text-[#4A3000] mb-4">
-            Mint Tokens
-          </h2>
-
-          {/* Cooldown Warning */}
-          {!canMint && cooldownRemaining > 0 && (
-            <div className="bg-[#FFB347]/20 border-2 border-[#FFB347]/50 rounded-xl p-4 mb-4">
-              <p className="text-[#4A3000] font-medium flex items-center gap-2">
-                <HiClock className="w-5 h-5 text-[#8B6914]" /> Cooldown Active
-              </p>
-              <p className="text-[#6B4F0F] text-sm mt-1">
-                You can mint again in {formatCooldown(cooldownRemaining)}
-              </p>
-            </div>
-          )}
-
-          {/* Amount Input */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-[#4A3000] mb-2">
-              Amount (USDC)
-            </label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              min="0"
-              max="1000"
-              step="0.01"
-              disabled={!canMint || isLoading}
-              className="w-full px-4 py-3 bg-[#FBF7EC] border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
-              placeholder="Enter amount (max 1000)"
-            />
-            <p className="text-sm text-[#8B6914]/70 mt-1">
-              Maximum: 1000 USDC per mint
-            </p>
-          </div>
-
-          {/* Quick Amount Buttons */}
-          <div className="flex gap-2 mb-6">
-            <button
-              onClick={() => setAmount('100')}
-              disabled={!canMint || isLoading}
-              className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
-            >
-              100 USDC
-            </button>
-            <button
-              onClick={() => setAmount('500')}
-              disabled={!canMint || isLoading}
-              className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
-            >
-              500 USDC
-            </button>
-            <button
-              onClick={() => setAmount('1000')}
-              disabled={!canMint || isLoading}
-              className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
-            >
-              1000 USDC
-            </button>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4 mb-4">
-              <p className="text-[#8B3030] flex items-center gap-2">
-                <HiExclamationCircle className="w-5 h-5" /> {error}
-              </p>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-4 mb-4">
-              <p className="text-[#2D5A2D] flex items-center gap-2">
-                <HiCheckCircle className="w-5 h-5" /> {success}
-              </p>
-            </div>
-          )}
-
-          {/* Mint Button */}
-          <button
-            onClick={handleMint}
-            disabled={!canMint || isLoading}
-            className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-bold text-lg border-2 border-[#D4A84B]"
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <LottieSpinner size={24} />
-                Minting...
-              </span>
-            ) : !canMint ? (
-              'Cooldown Active'
-            ) : (
-              <span className="flex items-center justify-center gap-2"><FaCoins className="w-5 h-5" /> Mint USDC</span>
-            )}
-          </button>
-        </div>
-
-        {/* Info Card */}
-        <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/50 rounded-2xl p-6">
-          <h3 className="font-bold text-[#4A3000] mb-3 flex items-center gap-2">
-            <FaFaucet className="w-5 h-5 text-[#8B6914]" /> Faucet Information
-          </h3>
-          <ul className="space-y-2 text-sm text-[#6B4F0F]">
-            <li className="flex items-start gap-2">
-              <span>•</span>
-              <span>Maximum mint: 1000 USDC per transaction</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span>•</span>
-              <span>Cooldown: 24 hours between mints</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span>•</span>
-              <span>This is a mock token for testing purposes</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span>•</span>
-              <span>Transactions are sponsored (gasless)</span>
-            </li>
-          </ul>
-        </div>
+      {/* Header - Full Width, Align Left (sama seperti Dashboard) */}
+      <div className="mb-6">
+        <h2
+          className="text-white text-2xl font-bold tracking-wider mb-2"
+          style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+        >
+          MINT USDC
+        </h2>
+        <p className="text-white/80 text-sm">
+          Get free mock USDC tokens for testing
+        </p>
       </div>
+
+      {/* Two Column Layout: Form (left) + Info (right) - Full Width */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* LEFT COLUMN: Mint Form */}
+          <div className="space-y-6">
+            {/* Mint Card */}
+            <div className="bg-[#F5EDD8] rounded-2xl shadow-xl p-6 border-2 border-[#D4A84B]/40">
+              <h2 className="text-xl font-bold text-[#4A3000] mb-4 flex items-center gap-2">
+                <FaCoins className="w-5 h-5 text-[#8B6914]" />
+                Mint Tokens
+              </h2>
+
+              {/* Cooldown Warning */}
+              {!canMint && cooldownRemaining > 0 && (
+                <div className="bg-[#FFB347]/20 border-2 border-[#FFB347]/50 rounded-xl p-4 mb-4">
+                  <p className="text-[#4A3000] font-medium flex items-center gap-2">
+                    <HiClock className="w-5 h-5 text-[#8B6914]" /> Cooldown Active
+                  </p>
+                  <p className="text-[#6B4F0F] text-sm mt-1">
+                    You can mint again in {formatCooldown(cooldownRemaining)}
+                  </p>
+                </div>
+              )}
+
+              {/* Amount Input */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#4A3000] mb-2">
+                  Amount (USDC)
+                </label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  min="0"
+                  max="1000"
+                  step="0.01"
+                  disabled={!canMint || isLoading}
+                  className="w-full px-4 py-3 bg-[#FBF7EC] border-2 border-[#D4A84B]/40 rounded-xl text-[#4A3000] focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+                  placeholder="Enter amount (max 1000)"
+                />
+                <p className="text-sm text-[#8B6914]/70 mt-1 flex items-center gap-1">
+                  <HiInformationCircle className="w-4 h-4" />
+                  Maximum: 1000 USDC per mint
+                </p>
+              </div>
+
+              {/* Quick Amount Buttons */}
+              <div className="grid grid-cols-3 gap-2 mb-6">
+                <button
+                  onClick={() => setAmount('100')}
+                  disabled={!canMint || isLoading}
+                  className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
+                >
+                  100
+                </button>
+                <button
+                  onClick={() => setAmount('500')}
+                  disabled={!canMint || isLoading}
+                  className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
+                >
+                  500
+                </button>
+                <button
+                  onClick={() => setAmount('1000')}
+                  disabled={!canMint || isLoading}
+                  className="px-4 py-2 bg-[#E8DCC0] text-[#4A3000] rounded-xl font-medium hover:bg-[#D4A84B]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-[#D4A84B]/30"
+                >
+                  1000
+                </button>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-[#FDF2F2] border-2 border-[#E5A0A0] rounded-xl p-4 mb-4">
+                  <p className="text-[#8B3030] flex items-center gap-2">
+                    <HiExclamationCircle className="w-5 h-5" /> {error}
+                  </p>
+                </div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <div className="bg-[#E8F4E8] border-2 border-[#9BC49B] rounded-xl p-4 mb-4">
+                  <p className="text-[#2D5A2D] flex items-center gap-2">
+                    <HiCheckCircle className="w-5 h-5" /> {success}
+                  </p>
+                </div>
+              )}
+
+              {/* Mint Button */}
+              <button
+                onClick={handleMint}
+                disabled={!canMint || isLoading}
+                className="w-full px-6 py-4 bg-gradient-to-r from-[#FFB347] to-[#E89530] text-[#4A3000] rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-bold text-lg border-2 border-[#D4A84B]"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <LottieSpinner size={24} />
+                    Minting...
+                  </span>
+                ) : !canMint ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <HiClock className="w-5 h-5" />
+                    Cooldown Active
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <FaCoins className="w-5 h-5" /> Mint USDC
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Balance + Info */}
+          <div className="space-y-6">
+            {/* Balance Card */}
+            <div className="bg-[#F5EDD8] rounded-2xl shadow-xl p-6 border-2 border-[#D4A84B]/40">
+              <h2 className="text-lg font-semibold text-[#8B6914] mb-2 flex items-center gap-2">
+                <FaWallet className="w-5 h-5" />
+                Current Balance
+              </h2>
+              <div className="text-4xl font-bold text-[#4A3000]">
+                {balanceFormatted} <span className="text-[#8B6914]">USDC</span>
+              </div>
+              <p className="text-sm text-[#8B6914]/70 mt-3 flex items-center gap-2">
+                <RiExchangeDollarFill className="w-4 h-4" />
+                Address: {user.address.slice(0, 8)}...{user.address.slice(-6)}
+              </p>
+            </div>
+
+            {/* Info Card */}
+            <div className="bg-[#F0E6D0] border-2 border-[#C9A86C]/50 rounded-2xl p-6">
+              <h3 className="font-bold text-[#4A3000] mb-3 flex items-center gap-2">
+                <FaFaucet className="w-5 h-5 text-[#8B6914]" /> Faucet Information
+              </h3>
+              <ul className="space-y-3 text-sm text-[#6B4F0F]">
+                <li className="flex items-start gap-2">
+                  <FaCoins className="w-4 h-4 text-[#8B6914] mt-0.5 flex-shrink-0" />
+                  <span>Maximum mint: 1000 USDC per transaction</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <HiClock className="w-4 h-4 text-[#8B6914] mt-0.5 flex-shrink-0" />
+                  <span>Cooldown: 24 hours between mints</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <FaGift className="w-4 h-4 text-[#8B6914] mt-0.5 flex-shrink-0" />
+                  <span>This is a mock token for testing purposes</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <FaMagic className="w-4 h-4 text-[#8B6914] mt-0.5 flex-shrink-0" />
+                  <span>Transactions are sponsored (gasless)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
     </DashboardLayout>
   );
 }

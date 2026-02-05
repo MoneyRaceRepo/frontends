@@ -77,17 +77,16 @@ export default function JoinPrivateRoom() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h2
-            className="text-white text-xl font-bold tracking-wider mb-2"
-            style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-          >
-            JOIN ROOM
-          </h2>
-          <p className="text-white/80 text-sm">Enter the Room ID or Password to join a private room</p>
-        </div>
+      {/* Header - Full Width, Align Left (sama seperti Dashboard) */}
+      <div className="mb-6">
+        <h2
+          className="text-white text-xl font-bold tracking-wider mb-2"
+          style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+        >
+          JOIN ROOM
+        </h2>
+        <p className="text-white/80 text-sm">Enter the Room ID or Password to join a private room</p>
+      </div>
 
         {/* Main Card */}
         <div className="bg-gradient-to-br from-[#8B6914]/20 to-[#8B6914]/10 rounded-xl p-4 border-2 border-[#8B6914]/40 shadow-lg">
@@ -250,7 +249,6 @@ export default function JoinPrivateRoom() {
           </div>
           )}
         </div>
-      </div>
     </DashboardLayout>
   );
 }

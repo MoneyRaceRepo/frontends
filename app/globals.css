@@ -39,6 +39,18 @@
     --input: 40 50% 80%;
     --ring: 38 82% 47%;
     --radius: 0.75rem;
+
+    /* Enhanced Hero Gradient Variables */
+    --hero-gradient-start: #7B542F;
+    --hero-gradient-mid: #B6771D;
+    --hero-gradient-end: #A06B1A;
+    --hero-glow-color: rgba(212, 162, 74, 0.3);
+
+    /* Transition Timing */
+    --transition-fast: 150ms;
+    --transition-base: 200ms;
+    --transition-slow: 300ms;
+    --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -50,15 +62,49 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Segoe UI', sans-serif;
   }
+
+  /* Smooth transitions for all interactive elements */
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* Focus ring consistency */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary/30 ring-offset-2;
+  }
 }
 
 @layer components {
-  /* Gold gradient background */
+  /* Enhanced Gold gradient background with glow */
   .bg-gold-gradient {
-    background: linear-gradient(180deg,
-      #7B542F 0%,
-      #B6771D 100%
-    );
+    position: relative;
+    background:
+      radial-gradient(ellipse at top, rgba(212, 162, 74, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(182, 119, 29, 0.2) 0%, transparent 50%),
+      linear-gradient(180deg, var(--hero-gradient-start) 0%, var(--hero-gradient-mid) 100%);
+  }
+
+  /* WOW Hero Gradient - Layered with glows */
+  .bg-hero-wow {
+    position: relative;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255, 215, 120, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 70% 80%, rgba(212, 162, 74, 0.2) 0%, transparent 50%),
+      linear-gradient(135deg, #7B542F 0%, #B6771D 50%, #A06B1A 100%);
+  }
+
+  .bg-hero-wow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 50% 20%, rgba(255, 179, 71, 0.08), transparent),
+      radial-gradient(ellipse 600px 400px at 80% 70%, rgba(212, 162, 74, 0.06), transparent);
+    pointer-events: none;
   }
 
   /* Hero gradient */

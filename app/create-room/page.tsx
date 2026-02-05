@@ -209,17 +209,16 @@ export default function CreateRoom() {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h2
-            className="text-white text-xl font-bold tracking-wider mb-2"
-            style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
-          >
-            CREATE ROOM
-          </h2>
-          <p className="text-white/80 text-sm">Start your savings journey with Money Race!</p>
-        </div>
+      {/* Header - Full Width, Align Left (sama seperti Dashboard) */}
+      <div className="mb-6">
+        <h2
+          className="text-white text-xl font-bold tracking-wider mb-2"
+          style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
+        >
+          CREATE ROOM
+        </h2>
+        <p className="text-white/80 text-sm">Start your savings journey with Money Race!</p>
+      </div>
 
         {/* Progress Steps */}
         <div className="bg-[#C9A86C]/40 rounded-2xl p-4 border-2 border-[#8B6914]/30 mb-6">
@@ -802,7 +801,6 @@ export default function CreateRoom() {
             </div>
           </div>
         )}
-      </div>
     </DashboardLayout>
   );
 }

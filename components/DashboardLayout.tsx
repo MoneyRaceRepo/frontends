@@ -302,7 +302,7 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
         <div className="h-[calc(100vh-96px)] lg:h-[calc(100vh-132px)] px-4 lg:px-8 pt-6 pb-10">
           <div className="h-full bg-[#C9A86C]/60 rounded-2xl lg:rounded-3xl border-2 lg:border-4 border-[#8B6914]/30 shadow-xl flex flex-col">
             {/* Main Content with padding - scrollable inside */}
-            <div className="flex-1 px-4 lg:px-8 py-4 lg:py-6 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 px-3 lg:px-6 py-4 lg:py-6 overflow-y-auto custom-scrollbar">
               {children}
             </div>
           </div>
