@@ -81,12 +81,12 @@ export default function JoinPrivateRoom() {
         {/* Header */}
         <div className="mb-6">
           <h2
-            className="text-[#4A3000] text-xl font-bold tracking-wider mb-2"
+            className="text-white text-xl font-bold tracking-wider mb-2"
             style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace" }}
           >
             JOIN ROOM
           </h2>
-          <p className="text-[#6B4F0F] text-sm">Enter the Room ID or Password to join a private room</p>
+          <p className="text-white/80 text-sm">Enter the Room ID or Password to join a private room</p>
         </div>
 
         {/* Main Card */}

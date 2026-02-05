@@ -17,7 +17,7 @@ const menuItems = [
   { icon: "create", label: "CREATE ROOM", href: "/create-room" },
   { icon: "join", label: "JOIN ROOM", href: "/join-private" },
   { icon: "mint", label: "MINT USDC", href: "/mint" },
-  { icon: "history", label: "HISTORY", href: "/history" },
+  { icon: "history", label: "SUBSCRIPTION", href: "/history" },
 ];
 
 const bottomMenuItems = [
