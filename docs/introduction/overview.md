@@ -39,15 +39,31 @@ Saving money shouldn't feel like a chore. Traditional methods lack motivation, a
 
 ---
 
-## How It Works (TL;DR)
+## How It Works
 
-```
-1. LOGIN   → Sign in with Google (zkLogin) or connect Sui wallet — no gas fees needed
-2. JOIN    → Pick a savings room that matches your goals
-3. SAVE    → Deposit USDC each period to stay in the race
-4. COMPETE → Stay consistent and climb the leaderboard
-5. EARN    → Claim your share of yield + rewards at the end
-```
+<img src="flowchart.png" alt="Money Race - How It Works Flowchart" width="100%"/>
+
+### Step 1: Login (Gasless)
+Sign in with **Google (zkLogin)** or connect a **Sui Wallet**. No crypto wallet setup required for new users — just your Google account. All transactions are **100% gasless**, you only need USDC.
+
+### Step 2: Create or Join a Room
+Browse active savings rooms on the dashboard, or create your own. Set your deposit amount, period (daily or weekly), duration (minimum 7 days), and choose a strategy. Private rooms can be shared with a password.
+
+### Step 3: AI Strategy Recommendation
+**EigenAI** analyzes your savings goals and recommends one of three strategies — Conservative (~4% APY), Balanced (~8% APY), or Aggressive (~15% APY). Each strategy allocates funds to different Sui DeFi protocols for optimal yield.
+
+### Step 4: Deposit Periodically
+Make your USDC deposit each period (daily or weekly) to stay in the race. Every deposit is **gasless** — the backend sponsors all gas fees. Each successful deposit increases your `deposited_count`, which determines your share of the reward pool.
+
+### Step 5: Yield Accumulates
+While you save, the Vault earns yield from DeFi protocols. Your **principal is always safe**. The reward pool grows over time based on your chosen strategy.
+
+### Step 6: Claim Rewards
+When the room ends, claim your proportional share of principal + yield:
+
+> **your_reward = (your_deposits / total_deposits) × total_yield**
+
+The more consistent you are, the bigger your share. No penalties — miss a deposit and you simply receive a smaller portion.
 
 ---
 
