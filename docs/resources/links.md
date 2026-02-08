@@ -4,8 +4,8 @@
 
 | Resource | URL |
 |----------|-----|
-| Website | [Coming Soon] |
-| dApp | [Coming Soon] |
+| Website | [moneyraceapp-lac.vercel.app](https://moneyraceapp-lac.vercel.app/) |
+| dApp | [moneyraceapp-lac.vercel.app](https://moneyraceapp-lac.vercel.app/) |
 | Documentation | You are here |
 | GitHub | [Coming Soon] |
 
