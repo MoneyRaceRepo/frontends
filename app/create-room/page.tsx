@@ -341,7 +341,7 @@ export default function CreateRoom() {
               className="w-full px-4 py-3 bg-[#FBF7EC] rounded-xl border-2 border-[#D4A84B]/40 text-[#4A3000] placeholder-[#8B6914]/40 focus:outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/30 transition-all"
             />
             <p className="text-xs text-[#6B4F0F] mt-1">
-              Minimal durasi: {depositFrequency === "daily" ? "7 hari (1 minggu)" : "1 minggu"}
+              Minimum duration: {depositFrequency === "daily" ? "7 days (1 week)" : "1 week"}
             </p>
           </div>
 
