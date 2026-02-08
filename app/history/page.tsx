@@ -16,20 +16,20 @@ interface UsageData {
 }
 
 export default function HistoryPage() {
-  // Dummy state - bisa diganti dengan state management atau API
+  // Dummy state - can be replaced with state management or API
   const [currentPlan, setCurrentPlan] = useState<PlanType>("FREE");
 
-  // Dummy usage data untuk testing
+  // Dummy usage data for testing
   const [usage, setUsage] = useState<UsageData>({
     publicRooms: { used: 2, max: 5 },
     privateRooms: { used: 1, max: 3 },
     aiRecommendation: { used: 3, max: 5 }
   });
 
-  // Function untuk simulasi ganti plan (development only)
+  // Function to simulate plan change (development only)
   const handlePlanChange = (plan: PlanType) => {
     setCurrentPlan(plan);
-    // Update usage limits berdasarkan plan
+    // Update usage limits based on plan
     if (plan === "FREE") {
       setUsage({
         publicRooms: { used: 2, max: 5 },
@@ -68,7 +68,7 @@ export default function HistoryPage() {
         >
           SUBSCRIPTION & PLANS
         </h2>
-        <p className="text-white/80 text-sm">Pilih plan yang sesuai dengan kebutuhan Anda</p>
+        <p className="text-white/80 text-sm">Choose a plan that suits your needs</p>
       </div>
 
       {/* Warning Banner if limit reached */}
@@ -77,8 +77,8 @@ export default function HistoryPage() {
           <div className="flex items-center gap-2 text-white">
             <HiExclamationCircle className="w-5 h-5 flex-shrink-0" />
             <div>
-              <p className="font-bold text-sm">Batas Kuota Tercapai!</p>
-              <p className="text-xs opacity-90">Upgrade ke VIP atau Super VIP untuk melanjutkan.</p>
+              <p className="font-bold text-sm">Quota Limit Reached!</p>
+              <p className="text-xs opacity-90">Upgrade to VIP or Super VIP to continue.</p>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function HistoryPage() {
                 : "bg-white text-[#8B6914] border-2 border-[#D4A84B]/40 hover:border-[#D4A84B]"
             }`}
           >
-            Simulasi FREE
+            Simulate FREE
           </button>
           <button
             onClick={() => handlePlanChange("VIP")}
@@ -109,7 +109,7 @@ export default function HistoryPage() {
                 : "bg-white text-[#8B6914] border-2 border-[#D4A84B]/40 hover:border-[#D4A84B]"
             }`}
           >
-            Simulasi VIP
+            Simulate VIP
           </button>
           <button
             onClick={() => handlePlanChange("SUPER_VIP")}
@@ -119,7 +119,7 @@ export default function HistoryPage() {
                 : "bg-white text-[#8B6914] border-2 border-[#D4A84B]/40 hover:border-[#D4A84B]"
             }`}
           >
-            Simulasi SUPER VIP
+            Simulate SUPER VIP
           </button>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function HistoryPage() {
       <div className="mb-6 bg-[#F5EDD8] rounded-xl p-4 border-2 border-[#D4A84B]/40 shadow-lg">
         <div className="flex items-center gap-2 mb-3">
           <HiSparkles className="w-4 h-4 text-[#8B6914]" />
-          <h3 className="text-[#4A3000] font-bold text-sm">Ringkasan Penggunaan Anda</h3>
+          <h3 className="text-[#4A3000] font-bold text-sm">Your Usage Summary</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -167,12 +167,12 @@ export default function HistoryPage() {
           icon={<FaRocket className="w-8 h-8" />}
           badge={currentPlan === "FREE" ? "Current Plan" : null}
           badgeColor="bg-gray-500"
-          price="Gratis"
+          price="Free"
           features={[
-            { label: "Public Room Creation", value: "Maksimal 5 kali", icon: <FaUsers className="w-4 h-4" /> },
-            { label: "Private Room Creation", value: "Maksimal 3 kali", icon: <HiLockClosed className="w-4 h-4" /> },
-            { label: "AI Recommendation", value: "Maksimal 5 kali", icon: <HiLightBulb className="w-4 h-4" /> },
-            { label: "Akses fitur dasar", value: "Included", icon: <HiCheckCircle className="w-4 h-4" /> }
+            { label: "Public Room Creation", value: "Max 5 times", icon: <FaUsers className="w-4 h-4" /> },
+            { label: "Private Room Creation", value: "Max 3 times", icon: <HiLockClosed className="w-4 h-4" /> },
+            { label: "AI Recommendation", value: "Max 5 times", icon: <HiLightBulb className="w-4 h-4" /> },
+            { label: "Access basic features", value: "Included", icon: <HiCheckCircle className="w-4 h-4" /> }
           ]}
           buttonText={currentPlan === "FREE" ? "Current Plan" : "Downgrade"}
           buttonDisabled={currentPlan === "FREE"}
@@ -188,11 +188,11 @@ export default function HistoryPage() {
           icon={<RiVipCrownFill className="w-8 h-8" />}
           badge={currentPlan === "VIP" ? "Current Plan" : "Recommended"}
           badgeColor={currentPlan === "VIP" ? "bg-purple-500" : "bg-blue-500"}
-          price="$9.99/bulan"
+          price="$9.99/month"
           features={[
             { label: "Public Room Creation", value: "Unlimited", icon: <FaUsers className="w-4 h-4" /> },
             { label: "Private Room Creation", value: "Unlimited", icon: <HiLockClosed className="w-4 h-4" /> },
-            { label: "AI Recommendation", value: "Maksimal 1000 kali", icon: <HiLightBulb className="w-4 h-4" /> },
+            { label: "AI Recommendation", value: "Max 1000 times", icon: <HiLightBulb className="w-4 h-4" /> },
             { label: "Priority support", value: "Included", icon: <FaHeadset className="w-4 h-4" /> },
             { label: "Advanced analytics", value: "Included", icon: <FaChartLine className="w-4 h-4" /> }
           ]}
@@ -211,7 +211,7 @@ export default function HistoryPage() {
           icon={<RiVipCrown2Fill className="w-8 h-8" />}
           badge={currentPlan === "SUPER_VIP" ? "Current Plan" : "Best Value"}
           badgeColor={currentPlan === "SUPER_VIP" ? "bg-amber-500" : "bg-gradient-to-r from-yellow-400 to-amber-500"}
-          price="$29.99/bulan"
+          price="$29.99/month"
           features={[
             { label: "Public Room Creation", value: "Unlimited", icon: <FaUsers className="w-4 h-4" /> },
             { label: "Private Room Creation", value: "Unlimited", icon: <HiLockClosed className="w-4 h-4" /> },
@@ -234,13 +234,13 @@ export default function HistoryPage() {
       <div className="bg-[#F5EDD8] rounded-lg p-4 border border-[#D4A84B]/30">
         <h4 className="text-[#4A3000] font-bold text-sm mb-2 flex items-center gap-2">
           <HiInformationCircle className="w-5 h-5 text-[#8B6914]" />
-          Informasi Penting:
+          Important Information:
         </h4>
         <ul className="text-[#6B4F0F] text-xs space-y-1">
-          <li>• Upgrade dapat dilakukan kapan saja</li>
-          <li>• Downgrade akan berlaku di periode billing berikutnya</li>
-          <li>• Kuota direset setiap bulan untuk plan berbayar</li>
-          <li>• Semua transaksi aman dan terenkripsi</li>
+          <li>• Upgrades can be done at any time</li>
+          <li>• Downgrades will take effect in the next billing period</li>
+          <li>• Quotas are reset monthly for paid plans</li>
+          <li>• All transactions are secure and encrypted</li>
         </ul>
       </div>
     </DashboardLayout>

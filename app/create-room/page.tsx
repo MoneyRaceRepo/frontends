@@ -118,12 +118,12 @@ export default function CreateRoom() {
 
       // Validate minimum duration
       if (depositFrequency === "daily" && totalPeriods < 7) {
-        setError("Untuk deposit harian, minimal durasi adalah 7 hari (1 minggu)");
+        setError("For daily deposits, minimum duration is 7 days (1 week)");
         setCreateLoading(false);
         return;
       }
       if (depositFrequency === "weekly" && totalPeriods < 1) {
-        setError("Untuk deposit mingguan, minimal durasi adalah 1 minggu");
+        setError("For weekly deposits, minimum duration is 1 week");
         setCreateLoading(false);
         return;
       }
@@ -390,7 +390,7 @@ export default function CreateRoom() {
                       <div className="mt-2 bg-red-100 rounded-lg p-2 border-2 border-red-400">
                         <p className="text-sm text-red-700 font-semibold flex items-center gap-2">
                           <HiExclamationCircle className="w-4 h-4" />
-                          ⚠️ Durasi terlalu pendek! Minimal {depositFrequency === "daily" ? "7 hari (1 minggu)" : "1 minggu"}
+                          Duration too short! Minimum {depositFrequency === "daily" ? "7 days (1 week)" : "1 week"}
                         </p>
                       </div>
                     );

@@ -162,7 +162,7 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
         />
       </div>
 
-      {/* Sidebar - Sejajar dengan content area */}
+      {/* Sidebar - Aligned with content area */}
       <aside className="fixed left-0 top-[96px] lg:top-[132px] bottom-0 w-60 sm:w-64 lg:w-72 bg-gradient-to-b from-[#B08D57] to-[#9A7B4A] z-20 flex flex-col py-6 px-4">
         {/* Navigation Menu */}
         <nav className="flex flex-col h-full">
@@ -228,10 +228,10 @@ export default function DashboardLayout({ children, activeRoomId }: DashboardLay
             ))}
           </ul>
 
-          {/* Divider - lebih subtle */}
+          {/* Divider - more subtle */}
           <div className="my-4 mx-2 border-t border-dashed border-[#8B6914]/30"></div>
 
-          {/* Spacer untuk push sign out ke bawah tapi tidak terlalu jauh */}
+          {/* Spacer to push sign out down but not too far */}
           <div className="flex-1 min-h-[100px]"></div>
 
           {/* Bottom Menu - Sign Out */}

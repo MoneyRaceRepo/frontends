@@ -371,7 +371,7 @@ export default function RoomDetail() {
 
   const fetchRoomData = async () => {
     try {
-      // Validasi Room ID sebelum fetch
+      // Validate Room ID before fetch
       if (!roomId || roomId.length < 10) {
         console.warn("Invalid Room ID:", roomId);
         setError(`Invalid Room ID format. Received: ${roomId || 'undefined'}`);
