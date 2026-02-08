@@ -6,8 +6,10 @@
 |----------|-----|
 | Website | [moneyraceapp-lac.vercel.app](https://moneyraceapp-lac.vercel.app/) |
 | dApp | [moneyraceapp-lac.vercel.app](https://moneyraceapp-lac.vercel.app/) |
-| Documentation | You are here |
-| GitHub | [Coming Soon] |
+| Documentation | [GitBook](https://minigarage.gitbook.io/moneyrace/) |
+| GitHub (Frontend) | [MoneyRaceRepo/frontends](https://github.com/MoneyRaceRepo/frontends) |
+| GitHub (Backend) | [MoneyRaceRepo/backends](https://github.com/MoneyRaceRepo/backends) |
+| GitHub (Smart Contract) | [MoneyRaceRepo/smartcontract](https://github.com/MoneyRaceRepo/smartcontract) |
 
 ---
 
@@ -15,9 +17,9 @@
 
 | Platform | Link |
 |----------|------|
-| Twitter/X | [@MoneyRaceSui](https://twitter.com/) |
-| Discord | [Join Community](https://discord.gg/) |
-| YouTube | [Money Race](https://youtube.com/) |
+| Twitter/X | [Coming Soon] |
+| Discord | [Coming Soon] |
+| YouTube | [Coming Soon] |
 
 ---
 
@@ -57,9 +59,9 @@
 
 ## Contact
 
-- **Email:** team@moneyrace.xyz
-- **Business:** partnerships@moneyrace.xyz
-- **Support:** support@moneyrace.xyz
+- **Email:** diva.filemon@ti.ukdw.ac.id
+- **GitHub:** [DivaManik](https://github.com/DivaManik)
+- **X:** [@ManikDiva62985](https://x.com/ManikDiva62985)
 
 ---
 

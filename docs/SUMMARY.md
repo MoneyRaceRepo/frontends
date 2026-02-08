@@ -28,6 +28,7 @@
 
 ## Resources
 
+* [Our Team](resources/team.md)
 * [FAQ](resources/faq.md)
 * [Glossary](resources/glossary.md)
 * [Links](resources/links.md)
